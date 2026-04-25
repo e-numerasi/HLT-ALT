@@ -1,0 +1,2452 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>HLT &amp; ALT — Lintasan Belajar SPLTDV — Flipbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   DESIGN TOKENS
+   ========================================================= */
+:root {
+  --paper: #f5ecd7;
+  --paper-light: #fbf5e3;
+  --paper-shadow: #e8dcb8;
+  --ink: #2a2018;
+  --ink-soft: #4a3d2e;
+  --ink-mute: #7a6b54;
+  --emerald: #1f5f4a;
+  --emerald-deep: #143b2e;
+  --emerald-light: #2c7a60;
+  --gold: #c9a870;
+  --gold-deep: #a07e3f;
+  --gold-soft: #e6d4a3;
+  --maroon: #6b2a1a;
+  --rule: #c4b690;
+
+  --serif: 'Lora', Georgia, serif;
+  --display: 'Cormorant Garamond', 'Times New Roman', serif;
+  --title: 'Cinzel', serif;
+  --ui: 'Inter', -apple-system, sans-serif;
+
+  --book-w: 1080px;
+  --book-h: 720px;
+  --pg-padding-h: 56px;
+  --pg-padding-v: 60px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--serif);
+  background:
+    radial-gradient(ellipse at top, #2a3f3a 0%, #0e1a17 70%),
+    #0e1a17;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ambient texture for backdrop */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(201, 168, 112, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(31, 95, 74, 0.08) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* =========================================================
+   HEADER UI
+   ========================================================= */
+.app-header {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 22px;
+  background: rgba(20, 30, 28, 0.65);
+  border: 1px solid rgba(201, 168, 112, 0.25);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.app-header h1 {
+  font-family: var(--title);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gold-soft);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.app-header .divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(201, 168, 112, 0.3);
+}
+.app-header .toc-btn {
+  font-family: var(--ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+  background: transparent;
+  border: 1px solid rgba(201, 168, 112, 0.4);
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.app-header .toc-btn:hover {
+  background: rgba(201, 168, 112, 0.15);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* =========================================================
+   FLIPBOOK STAGE
+   ========================================================= */
+.stage {
+  perspective: 2800px;
+  perspective-origin: 50% 50%;
+  width: 100%;
+  max-width: var(--book-w);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.book {
+  position: relative;
+  width: var(--book-w);
+  height: var(--book-h);
+  transform-style: preserve-3d;
+  /* Subtle floating animation */
+  animation: float 8s ease-in-out infinite;
+  filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.55));
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Spine shadow down the middle */
+.book::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 30px;
+  height: 100%;
+  transform: translateX(-50%);
+  background:
+    linear-gradient(90deg,
+      rgba(0,0,0,0) 0%,
+      rgba(0,0,0,0.18) 30%,
+      rgba(0,0,0,0.32) 50%,
+      rgba(0,0,0,0.18) 70%,
+      rgba(0,0,0,0) 100%);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* The "back of the book" — visible behind the rightmost unflipped leaf */
+.book-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  z-index: 0;
+}
+.book-back .half {
+  width: 50%;
+  height: 100%;
+  background:
+    linear-gradient(135deg, #0f2a22 0%, #1a3a30 50%, #0f2a22 100%);
+  border: 1px solid #08171180;
+}
+.book-back .half.left {
+  border-radius: 4px 0 0 4px;
+  box-shadow: inset -4px 0 12px rgba(0,0,0,0.4);
+}
+.book-back .half.right {
+  border-radius: 0 4px 4px 0;
+  box-shadow: inset 4px 0 12px rgba(0,0,0,0.4);
+}
+
+/* =========================================================
+   LEAVES & PAGES
+   ========================================================= */
+.leaf {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform-origin: left center;
+  transition: transform 0.95s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+  cursor: pointer;
+}
+.leaf.flipped {
+  transform: rotateY(-180deg);
+}
+.leaf.flipping {
+  cursor: grabbing;
+}
+
+.page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--paper);
+  background-image:
+    radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(232, 220, 184, 0.5) 0%, transparent 50%),
+    repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(180, 160, 110, 0.025) 2px, rgba(180,160,110,0.025) 3px);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.page.front {
+  border-radius: 0 4px 4px 0;
+  box-shadow:
+    inset 12px 0 24px -12px rgba(0,0,0,0.25),
+    inset 0 0 80px rgba(180, 150, 90, 0.06);
+}
+.page.back {
+  transform: rotateY(180deg);
+  border-radius: 4px 0 0 4px;
+  box-shadow:
+    inset -12px 0 24px -12px rgba(0,0,0,0.25),
+    inset 0 0 80px rgba(180, 150, 90, 0.06);
+}
+
+/* Page subtle "deckle" edge decoration */
+.page.front::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(120, 100, 60, 0.18));
+  pointer-events: none;
+}
+.page.back::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(-90deg, transparent, rgba(120, 100, 60, 0.18));
+  pointer-events: none;
+}
+
+/* Page content container */
+.page-inner {
+  flex: 1;
+  padding: var(--pg-padding-v) var(--pg-padding-h);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+.page.front .page-inner { padding-right: calc(var(--pg-padding-h) - 12px); padding-left: calc(var(--pg-padding-h) + 12px); }
+.page.back  .page-inner { padding-left: calc(var(--pg-padding-h) - 12px); padding-right: calc(var(--pg-padding-h) + 12px); }
+
+/* Footer (page number) */
+.page-footer {
+  font-family: var(--ui);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--ink-mute);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+.page-footer .ornament {
+  width: 30px;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* =========================================================
+   CONTENT TYPOGRAPHY
+   ========================================================= */
+.eyebrow {
+  font-family: var(--title);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--emerald);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.eyebrow::before, .eyebrow::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+  max-width: 40px;
+}
+
+h2.chapter-title {
+  font-family: var(--display);
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1.05;
+  color: var(--ink);
+  margin-bottom: 18px;
+  letter-spacing: -0.01em;
+}
+h3.section {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--emerald-deep);
+  margin: 18px 0 10px 0;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+}
+h4.sub {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--maroon);
+  margin: 12px 0 6px 0;
+}
+
+p {
+  font-family: var(--serif);
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--ink);
+  margin-bottom: 9px;
+  text-align: justify;
+  hyphens: auto;
+}
+p.lead {
+  font-size: 13.5px;
+  line-height: 1.6;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+ul, ol { padding-left: 20px; margin-bottom: 8px; }
+li { font-size: 12px; line-height: 1.55; margin-bottom: 4px; color: var(--ink); }
+
+strong { color: var(--emerald-deep); font-weight: 600; }
+em { font-style: italic; color: var(--ink-soft); }
+
+/* Drop cap for chapter openings */
+.dropcap::first-letter {
+  font-family: var(--display);
+  font-size: 56px;
+  font-weight: 700;
+  float: left;
+  line-height: 0.85;
+  margin: 4px 8px 0 0;
+  color: var(--emerald);
+  font-style: italic;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: 10.5px;
+  font-family: var(--serif);
+}
+table th {
+  background: var(--emerald-deep);
+  color: var(--gold-soft);
+  font-family: var(--ui);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 7px 8px;
+  text-align: left;
+  border: 1px solid var(--emerald-deep);
+}
+table td {
+  padding: 6px 8px;
+  border: 1px solid #d4c8a4;
+  background: rgba(255, 255, 255, 0.35);
+  vertical-align: top;
+  line-height: 1.45;
+}
+table tr:nth-child(even) td {
+  background: rgba(232, 220, 184, 0.4);
+}
+
+/* Pull-out callout cards */
+.callout {
+  border: 1px solid var(--gold-deep);
+  background: linear-gradient(135deg, rgba(230, 212, 163, 0.45) 0%, rgba(245, 236, 215, 0.7) 100%);
+  border-radius: 3px;
+  padding: 12px 14px;
+  margin: 10px 0;
+  font-size: 11.5px;
+  position: relative;
+}
+.callout::before {
+  content: "";
+  position: absolute;
+  top: 6px; left: 6px; right: 6px; bottom: 6px;
+  border: 1px solid rgba(160, 126, 63, 0.3);
+  pointer-events: none;
+  border-radius: 1px;
+}
+.callout .callout-title {
+  font-family: var(--title);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--maroon);
+  margin-bottom: 6px;
+  display: block;
+}
+.callout p, .callout li { font-size: 11.5px; }
+.callout.emerald {
+  border-color: var(--emerald);
+  background: linear-gradient(135deg, rgba(44, 122, 96, 0.18), rgba(245, 236, 215, 0.7));
+}
+.callout.emerald .callout-title { color: var(--emerald-deep); }
+
+/* Profile cards */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0;
+}
+.profile-card {
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--emerald);
+  padding: 9px 10px;
+  background: rgba(255,255,255,0.35);
+  border-radius: 2px;
+}
+.profile-card.quitter { border-top-color: var(--maroon); }
+.profile-card.camper  { border-top-color: var(--gold-deep); }
+.profile-card.climber { border-top-color: var(--emerald); }
+.profile-card .name {
+  font-family: var(--title);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.profile-card.quitter .name { color: var(--maroon); }
+.profile-card.camper .name  { color: var(--gold-deep); }
+.profile-card.climber .name { color: var(--emerald-deep); }
+.profile-card .score {
+  font-family: var(--display);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink-mute);
+  margin-bottom: 6px;
+}
+.profile-card ul {
+  padding-left: 14px;
+}
+.profile-card li {
+  font-size: 10.5px;
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+
+/* Ornamental dividers */
+.ornament-rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 14px auto;
+  color: var(--gold-deep);
+}
+.ornament-rule .line {
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+  max-width: 90px;
+}
+.ornament-rule .glyph {
+  font-family: var(--display);
+  font-size: 16px;
+  font-style: italic;
+}
+
+/* Two-column flow */
+.two-col {
+  column-count: 2;
+  column-gap: 22px;
+  column-rule: 1px solid rgba(180, 160, 110, 0.25);
+}
+.two-col p { font-size: 11.5px; }
+
+/* =========================================================
+   COVER (special pages)
+   ========================================================= */
+.cover {
+  background:
+    radial-gradient(ellipse at center, #1f5f4a 0%, #143b2e 70%, #0a1f17 100%);
+  color: var(--gold-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 50px;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-radius: inherit;
+}
+.cover::before {
+  content: "";
+  position: absolute;
+  inset: 26px;
+  border: 1px solid rgba(201, 168, 112, 0.55);
+}
+.cover::after {
+  content: "";
+  position: absolute;
+  inset: 32px;
+  border: 1px solid rgba(201, 168, 112, 0.25);
+}
+.cover .cover-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  justify-content: space-between;
+  padding: 40px 0;
+}
+.cover .cover-mark {
+  font-family: var(--title);
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+.cover .cover-mark::before, .cover .cover-mark::after {
+  content: "❖";
+  margin: 0 14px;
+  color: var(--gold-deep);
+}
+.cover .cover-title-block {
+  text-align: center;
+}
+.cover .cover-eyebrow {
+  font-family: var(--title);
+  font-size: 13px;
+  letter-spacing: 0.5em;
+  color: var(--gold);
+  margin-bottom: 24px;
+}
+.cover h1.cover-title {
+  font-family: var(--display);
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1.0;
+  color: #f3e3b8;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+.cover h1.cover-title em {
+  font-style: italic;
+  color: var(--gold);
+}
+.cover .cover-subtitle {
+  font-family: var(--display);
+  font-size: 18px;
+  font-style: italic;
+  color: var(--gold-soft);
+  font-weight: 500;
+  margin: 16px 0 28px;
+  letter-spacing: 0.02em;
+}
+.cover .cover-subject {
+  font-family: var(--title);
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  color: var(--gold-soft);
+  padding: 14px 30px;
+  border-top: 1px solid rgba(201, 168, 112, 0.4);
+  border-bottom: 1px solid rgba(201, 168, 112, 0.4);
+  text-transform: uppercase;
+}
+.cover .cover-subject strong { color: var(--gold); font-weight: 700; }
+.cover .cover-foot {
+  text-align: center;
+}
+.cover .cover-audience {
+  font-family: var(--serif);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--gold-soft);
+  margin-bottom: 12px;
+  letter-spacing: 0.04em;
+}
+.cover .cover-year {
+  font-family: var(--display);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+}
+
+/* Decorative SVG corners on cover */
+.cover .corner {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  z-index: 3;
+  color: var(--gold);
+  opacity: 0.85;
+}
+.cover .corner.tl { top: 20px; left: 20px; }
+.cover .corner.tr { top: 20px; right: 20px; transform: rotate(90deg); }
+.cover .corner.bl { bottom: 20px; left: 20px; transform: rotate(-90deg); }
+.cover .corner.br { bottom: 20px; right: 20px; transform: rotate(180deg); }
+
+/* Inside front cover, back cover */
+.endpaper {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 12px, rgba(31, 95, 74, 0.08) 12px 13px),
+    linear-gradient(135deg, #f0e3c6 0%, #e8d9b4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+}
+.endpaper .stamp {
+  text-align: center;
+  border: 1px solid var(--emerald);
+  padding: 30px 40px;
+  background: rgba(255,255,255,0.4);
+  max-width: 320px;
+}
+.endpaper .stamp .ornament-rule { margin: 10px auto; }
+.endpaper .stamp h3 {
+  font-family: var(--display);
+  color: var(--emerald-deep);
+  font-style: italic;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+.endpaper .stamp p {
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* Chapter divider page */
+.chapter-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  padding: 0 30px;
+}
+.chapter-divider .roman {
+  font-family: var(--display);
+  font-size: 88px;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--gold-deep);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.chapter-divider .label {
+  font-family: var(--title);
+  font-size: 13px;
+  letter-spacing: 0.4em;
+  color: var(--ink-mute);
+  margin-bottom: 22px;
+}
+.chapter-divider h1 {
+  font-family: var(--display);
+  font-size: 38px;
+  font-weight: 600;
+  color: var(--emerald-deep);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin-bottom: 26px;
+  max-width: 80%;
+}
+.chapter-divider .ornament-rule { width: 60%; }
+.chapter-divider .summary {
+  font-family: var(--display);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--ink-soft);
+  max-width: 75%;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   NAVIGATION CONTROLS
+   ========================================================= */
+.nav-controls {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 18px;
+  background: rgba(20, 30, 28, 0.65);
+  border: 1px solid rgba(201, 168, 112, 0.25);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.nav-btn {
+  background: transparent;
+  border: 1px solid rgba(201, 168, 112, 0.4);
+  color: var(--gold-soft);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.25s ease;
+  font-family: var(--ui);
+}
+.nav-btn:hover:not(:disabled) {
+  background: rgba(201, 168, 112, 0.18);
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-1px);
+}
+.nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.page-counter {
+  font-family: var(--ui);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--gold-soft);
+  min-width: 90px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.page-counter .current {
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* =========================================================
+   TABLE OF CONTENTS DRAWER
+   ========================================================= */
+.toc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 20, 18, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.toc-overlay.open {
+  display: flex;
+  opacity: 1;
+}
+.toc-panel {
+  background: var(--paper);
+  background-image:
+    radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.6), transparent 50%);
+  max-width: 700px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 40px 50px;
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  position: relative;
+  transform: scale(0.96);
+  transition: transform 0.3s ease;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+}
+.toc-overlay.open .toc-panel { transform: scale(1); }
+.toc-panel::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(160, 126, 63, 0.3);
+  pointer-events: none;
+}
+.toc-panel h2 {
+  font-family: var(--display);
+  font-size: 32px;
+  color: var(--emerald-deep);
+  text-align: center;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+.toc-panel .toc-sub {
+  font-family: var(--title);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: var(--ink-mute);
+  text-align: center;
+  margin-bottom: 22px;
+}
+.toc-list {
+  list-style: none;
+  padding: 0;
+}
+.toc-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 6px;
+  margin: 0;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-radius: 2px;
+  font-family: var(--serif);
+  font-size: 13px;
+  color: var(--ink);
+}
+.toc-list li:hover {
+  background: rgba(201, 168, 112, 0.18);
+}
+.toc-list li .toc-num {
+  font-family: var(--title);
+  color: var(--gold-deep);
+  letter-spacing: 0.1em;
+  font-size: 11px;
+  flex-shrink: 0;
+  width: 50px;
+}
+.toc-list li .toc-title {
+  flex: 1;
+}
+.toc-list li.chapter .toc-title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--emerald-deep);
+}
+.toc-list li .toc-pg {
+  font-family: var(--ui);
+  font-size: 11px;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+.toc-list li .toc-dots {
+  flex: 0 0 auto;
+  border-bottom: 1px dotted var(--rule);
+  flex: 1;
+  margin-bottom: 4px;
+  min-width: 20px;
+}
+.toc-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: transparent;
+  border: 1px solid var(--rule);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-size: 18px;
+  z-index: 10;
+}
+.toc-close:hover { background: rgba(0,0,0,0.06); color: var(--ink); }
+
+/* =========================================================
+   LOADER & HINT
+   ========================================================= */
+.hint {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--ui);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(230, 212, 163, 0.5);
+  z-index: 50;
+  pointer-events: none;
+  animation: hintFade 6s ease-in-out forwards;
+}
+@keyframes hintFade {
+  0%, 60% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* =========================================================
+   MOBILE / RESPONSIVE
+   ========================================================= */
+@media (max-width: 1180px) {
+  .stage {
+    transform: scale(calc(0.94 * (100vw - 40px) / 1080));
+    transform-origin: center center;
+  }
+}
+@media (max-width: 760px) {
+  body { padding: 60px 8px 80px; }
+  :root {
+    --book-w: 96vw;
+    --book-h: calc(96vw * 1.4);
+    --pg-padding-h: 22px;
+    --pg-padding-v: 28px;
+  }
+  .stage { transform: none; }
+  .book {
+    width: var(--book-w);
+    height: var(--book-h);
+  }
+  /* On mobile: show single page, hide left half of leaves, show only fronts */
+  .leaf {
+    width: 100%;
+    left: 0;
+    transform-origin: center center;
+    transition: transform 0.6s ease, opacity 0.4s ease;
+  }
+  .leaf.flipped {
+    transform: translateX(-110%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .page.back { display: none; }
+  .page.front { border-radius: 4px; }
+  .book::after { display: none; }
+  .book-back { display: none; }
+  h1.cover-title { font-size: 36px; }
+  .cover .cover-subtitle { font-size: 14px; }
+  .cover .cover-eyebrow { font-size: 10px; letter-spacing: 0.3em; }
+  .cover .cover-subject { font-size: 10px; padding: 10px 16px; }
+  .cover .cover-year { font-size: 24px; }
+  h2.chapter-title { font-size: 24px; }
+  h3.section { font-size: 16px; }
+  h4.sub { font-size: 14px; }
+  p, li { font-size: 11.5px; }
+  table { font-size: 10px; }
+  table th, table td { padding: 5px 6px; }
+  .chapter-divider .roman { font-size: 60px; }
+  .chapter-divider h1 { font-size: 24px; }
+  .profile-grid { grid-template-columns: 1fr; }
+  .two-col { column-count: 1; }
+  .app-header h1 { font-size: 11px; letter-spacing: 0.12em; }
+  .app-header { padding: 8px 14px; gap: 8px; }
+  .toc-panel { padding: 24px 22px; }
+  .toc-panel h2 { font-size: 22px; }
+  .toc-list li .toc-num { width: 40px; font-size: 10px; }
+  .toc-list li.chapter .toc-title { font-size: 13px; }
+  .toc-list li { font-size: 11.5px; }
+}
+
+/* ============= Additional styles for later leaves ============= */
+
+/* Maroon callout variant */
+.callout.maroon {
+  border-color: var(--maroon);
+  background: linear-gradient(135deg, rgba(107, 42, 26, 0.10), rgba(245, 236, 215, 0.7));
+}
+.callout.maroon .callout-title { color: var(--maroon); }
+
+/* Profile card alternate label structure used in LKPD section */
+.profile-card .profile-name {
+  font-family: var(--title);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.profile-card .profile-tag {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+/* Bibliography list */
+ul.biblio {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+ul.biblio li {
+  font-family: var(--body);
+  font-size: 11.5px;
+  line-height: 1.55;
+  padding: 8px 0 8px 22px;
+  border-bottom: 1px dotted rgba(60, 50, 35, 0.18);
+  text-indent: -22px;
+  margin-left: 22px;
+}
+ul.biblio li:last-child { border-bottom: none; }
+
+/* Glossary definition list */
+dl.glossary {
+  margin: 0;
+  padding: 0;
+  font-size: 11.5px;
+}
+dl.glossary dt {
+  font-family: var(--title);
+  font-weight: 600;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--emerald-deep);
+  margin-top: 8px;
+}
+dl.glossary dt:first-child { margin-top: 0; }
+dl.glossary dd {
+  font-family: var(--body);
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--ink);
+  margin: 2px 0 6px 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--gold);
+}
+
+/* Closing quote (refleksi akhir) */
+.closing-quote {
+  margin: 14px 0;
+  padding: 16px 20px;
+  background: linear-gradient(180deg, rgba(44, 122, 96, 0.06), rgba(245, 236, 215, 0));
+  border-left: 3px solid var(--gold-deep);
+  border-right: 3px solid var(--gold-deep);
+}
+
+/* Endpaper (back side) */
+.endpaper-back {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(201, 168, 112, 0.12) 0%, transparent 55%),
+    radial-gradient(circle at 70% 80%, rgba(20, 59, 46, 0.08) 0%, transparent 60%),
+    var(--paper) !important;
+}
+.endpaper-back .page-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.endpaper-content {
+  text-align: center;
+  max-width: 80%;
+}
+.endpaper-glyph {
+  font-size: 38px;
+  color: var(--gold-deep);
+  margin-bottom: 18px;
+}
+.endpaper-line {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin: 4px 0;
+}
+
+/* Back cover */
+.back-cover {
+  background:
+    radial-gradient(circle at 80% 10%, rgba(201, 168, 112, 0.10) 0%, transparent 55%),
+    radial-gradient(circle at 10% 90%, rgba(201, 168, 112, 0.08) 0%, transparent 50%),
+    linear-gradient(180deg, #0d2a20 0%, #143b2e 50%, #0a1f17 100%) !important;
+  color: #f5ecd7 !important;
+  position: relative;
+}
+.back-cover::after {
+  content: "";
+  position: absolute;
+  inset: 24px;
+  border: 1px solid rgba(201, 168, 112, 0.35);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.back-cover-inner {
+  position: absolute;
+  inset: 50px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 1;
+}
+.back-cover-top { text-align: center; }
+.back-cover-eyebrow {
+  font-family: var(--title);
+  font-size: 10px;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+.back-cover-glyph {
+  font-size: 26px;
+  color: var(--gold);
+  opacity: 0.85;
+}
+.back-cover-blurb {
+  font-family: var(--display);
+  font-size: 14px;
+  line-height: 1.6;
+  color: #e8dcb8;
+  text-align: center;
+  padding: 0 6px;
+}
+.back-cover-blurb p { margin: 0 0 12px 0; }
+.back-cover-quote {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 15px;
+  text-align: center;
+  color: var(--gold);
+  padding: 16px 20px;
+  border-top: 1px solid rgba(201, 168, 112, 0.35);
+  border-bottom: 1px solid rgba(201, 168, 112, 0.35);
+  margin: 18px 0;
+  line-height: 1.5;
+}
+.back-cover-bottom {
+  text-align: center;
+  padding-top: 12px;
+}
+.back-cover-publisher .pub-mark {
+  font-size: 22px;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+.back-cover-publisher .pub-name {
+  font-family: var(--title);
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+/* ============= Title page styles ============= */
+.title-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  padding: 0 30px;
+}
+.title-eyebrow {
+  font-family: var(--title);
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.title-main {
+  font-family: var(--display);
+  font-size: 38px;
+  font-weight: 600;
+  color: var(--emerald-deep);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin: 18px 0 24px 0;
+  max-width: 90%;
+}
+.title-sub {
+  margin-bottom: 16px;
+  max-width: 80%;
+}
+.title-sub p { margin: 0; }
+.title-pub {
+  font-family: var(--title);
+  font-size: 11.5px;
+  letter-spacing: 0.18em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  margin-top: 12px;
+}
+.title-pub p { margin: 4px 0; }
+
+/* ============= Static TOC list (inside Daftar Isi page) ============= */
+ul.toc-static {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+  font-family: var(--body);
+}
+ul.toc-static li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 0;
+  font-size: 11.5px;
+  border-bottom: 1px dotted rgba(60, 50, 35, 0.15);
+}
+ul.toc-static li:last-child { border-bottom: none; }
+ul.toc-static li .dots {
+  flex: 1;
+  border-bottom: 1px dotted rgba(60, 50, 35, 0.35);
+  margin: 0 6px;
+  height: 0;
+  position: relative;
+  top: -3px;
+}
+ul.toc-static li.toc-section {
+  border-bottom: none;
+  padding: 12px 0 4px 0;
+}
+ul.toc-static li.toc-section:first-child { padding-top: 4px; }
+ul.toc-static .toc-section-label {
+  font-family: var(--title);
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  color: var(--gold-deep);
+  text-transform: uppercase;
+}
+
+/* ============= Misc ============= */
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="app-header">
+  <h1>HLT &amp; ALT · SPLTDV</h1>
+  <span class="divider"></span>
+  <button class="toc-btn" id="tocBtn">Daftar Isi</button>
+</div>
+
+<!-- Hint -->
+<div class="hint">← Klik tepi halaman atau gunakan panah untuk membuka →</div>
+
+<!-- Stage -->
+<div class="stage">
+  <div class="book" id="book">
+
+    <!-- Permanent back of book (visible behind unflipped leaves) -->
+    <div class="book-back">
+      <div class="half left"></div>
+      <div class="half right"></div>
+    </div>
+
+    <!-- LEAVES START HERE -->
+    <!-- Each .leaf has .page.front (odd page) and .page.back (next even page) -->
+
+    <!-- LEAF 0 : COVER + INSIDE FRONT COVER -->
+    <div class="leaf" data-leaf="0">
+      <div class="page front">
+        <div class="cover">
+          <svg class="corner tl" viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1">
+            <path d="M2 20 L2 2 L20 2" />
+            <path d="M2 30 L2 8 L8 8 L8 30" opacity="0.6" />
+            <circle cx="14" cy="14" r="2" fill="currentColor" stroke="none"/>
+          </svg>
+          <svg class="corner tr" viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1">
+            <path d="M2 20 L2 2 L20 2" />
+            <path d="M2 30 L2 8 L8 8 L8 30" opacity="0.6" />
+            <circle cx="14" cy="14" r="2" fill="currentColor" stroke="none"/>
+          </svg>
+          <svg class="corner bl" viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1">
+            <path d="M2 20 L2 2 L20 2" />
+            <path d="M2 30 L2 8 L8 8 L8 30" opacity="0.6" />
+            <circle cx="14" cy="14" r="2" fill="currentColor" stroke="none"/>
+          </svg>
+          <svg class="corner br" viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1">
+            <path d="M2 20 L2 2 L20 2" />
+            <path d="M2 30 L2 8 L8 8 L8 30" opacity="0.6" />
+            <circle cx="14" cy="14" r="2" fill="currentColor" stroke="none"/>
+          </svg>
+          <div class="cover-content">
+            <div class="cover-mark">Penelitian Desain Didaktis</div>
+            <div class="cover-title-block">
+              <div class="cover-eyebrow">HLT · ALT </div>
+              <h1 class="cover-title">Lintasan<br/>Belajar <em>SPLTDV</em></h1>
+              <div class="cover-subtitle">Hypothetical &amp; Actual Learning Trajectory<br/>Berbasis Adversity Quotient</div>
+              <div class="cover-subject"><strong>Sistem Pertidaksamaan Linear Dua Variabel</strong></div>
+            </div>
+            <div class="cover-foot">
+              <div class="cover-audience">Untuk Penelitian Desain Didaktis · Guru Matematika SMA/SMK/MA</div>
+              <div class="cover-year">2025</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="page back endpaper-back">
+        <div class="page-inner">
+          <div class="endpaper-content">
+            <div class="endpaper-glyph">❦</div>
+            <p class="endpaper-line">Sebuah perjalanan dari rancangan</p>
+            <p class="endpaper-line">menuju pembuktian empiris —</p>
+            <div class="ornament-rule" style="margin: 24px auto; max-width: 220px;"><span class="line"></span><span class="glyph">✦</span><span class="line"></span></div>
+            <p class="endpaper-line">empat situasi didaktis,</p>
+            <p class="endpaper-line">tiga profil ketahanan,</p>
+            <p class="endpaper-line">dan satu metode SCALE.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEAF 1 : Halaman Judul + Kata Pengantar -->
+    <div class="leaf" data-leaf="1">
+      <div class="page front">
+        <div class="page-inner title-page">
+          <div class="title-eyebrow">Penelitian Desain Didaktis</div>
+          <div class="ornament-rule"><span class="line"></span><span class="glyph">❖</span><span class="line"></span></div>
+          <h1 class="title-main">Lintasan Belajar SPLTDV</h1>
+          <div class="title-sub">
+            <p style="font-style: italic; font-size: 15px; color: var(--ink-soft); margin: 6px 0;">Hypothetical Learning Trajectory (HLT)<br/>&amp; Actual Learning Trajectory (ALT)</p>
+            <p style="font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-deep); margin-top: 16px;">Berbasis Adversity Quotient</p>
+          </div>
+          <div class="ornament-rule" style="margin-top: 32px;"><span class="line"></span><span class="glyph">❖</span><span class="line"></span></div>
+          <div class="title-pub">
+            <p>Materi: Sistem Pertidaksamaan Linear Dua Variabel</p>
+            <p style="margin-top: 14px;">Makassar · 2025</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>i<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">Pengantar</div>
+          <h2 class="chapter-title">Kata Pengantar</h2>
+          <div class="ornament-rule"><span class="line"></span><span class="glyph">❖</span><span class="line"></span></div>
+          <p class="dropcap">Dokumen ini menyajikan dua sisi penting dari pendekatan <em>Didactical Design Research</em> (DDR): rancangan teoretis (HLT) yang disusun sebelum implementasi, dan lintasan aktual (ALT) yang muncul dari pengamatan empiris di kelas. Dari interaksi keduanya, lahirlah <strong>Desain Didaktis Empiris</strong> (DDE) — desain yang telah teruji dan disempurnakan.</p>
+          <p>Konteks materi yang dipilih adalah Sistem Pertidaksamaan Linear Dua Variabel (SPLTDV), yang diajarkan melalui empat <em>situasi didaktis</em> bertingkat: kantin sekolah, usaha fotokopi, perencanaan kegiatan, hingga optimasi toko roti.</p>
+          <p>Pendekatan yang digunakan memadukan <em>Scaffolded Instruction</em> dengan <em>Adversity Quotient</em> (AQ), menghasilkan tiga jalur pembelajaran berdiferensiasi untuk profil <strong>Quitter</strong>, <strong>Camper</strong>, dan <strong>Climber</strong>. Metode pembelajarannya — <strong>SCALE</strong> — terdiri atas lima fase: Set Up Goals, Contradict Adidactic, Anonymous Gallery, Lock-In, dan Extended.</p>
+          <div class="ornament-rule" style="margin: 18px 0;"><span class="line"></span><span class="glyph">§</span><span class="line"></span></div>
+          <p style="text-align: right; font-style: italic; font-size: 12.5px;">Penyusun</p>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>ii<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 2 : Daftar Isi + Petunjuk -->
+    <div class="leaf" data-leaf="2">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="eyebrow">Index</div>
+          <h2 class="chapter-title">Daftar Isi</h2>
+          <div class="ornament-rule"><span class="line"></span><span class="glyph">❖</span><span class="line"></span></div>
+          <ul class="toc-static">
+            <li class="toc-section"><span class="toc-section-label">Pembuka</span></li>
+            <li><span>Kata Pengantar</span><span class="dots"></span><span>ii</span></li>
+            <li><span>Daftar Isi · Petunjuk</span><span class="dots"></span><span>iii</span></li>
+            <li class="toc-section"><span class="toc-section-label">Bagian I — HLT (Hipotetik)</span></li>
+            <li><span>Ikhtisar 4 Situasi Didaktis</span><span class="dots"></span><span>1</span></li>
+            <li><span>Diferensiasi Scaffolding 3 Profil AQ</span><span class="dots"></span><span>3</span></li>
+            <li><span>SD1 — Konsep Dasar (Kantin)</span><span class="dots"></span><span>5</span></li>
+            <li><span>SD2 — Representasi Grafis (Fotokopi)</span><span class="dots"></span><span>7</span></li>
+            <li><span>SD3 — Jenis Daerah (Perencanaan)</span><span class="dots"></span><span>9</span></li>
+            <li><span>SD4 — Optimasi (Toko Roti)</span><span class="dots"></span><span>11</span></li>
+            <li class="toc-section"><span class="toc-section-label">Bagian II — ALT &amp; DDE (Empiris)</span></li>
+            <li><span>Sintesis Perubahan DDH → DDE</span><span class="dots"></span><span>13</span></li>
+            <li><span>Komponen Terkonfirmasi Efektif</span><span class="dots"></span><span>15</span></li>
+            <li><span>SD1 — Capaian Aktual</span><span class="dots"></span><span>17</span></li>
+            <li><span>SD2 — Capaian Aktual</span><span class="dots"></span><span>19</span></li>
+            <li><span>SD3 — Capaian Aktual</span><span class="dots"></span><span>21</span></li>
+            <li><span>SD4 — Capaian Aktual</span><span class="dots"></span><span>23</span></li>
+            <li><span>Formalisasi Alat Bantu &amp; Protokol</span><span class="dots"></span><span>25</span></li>
+            <li><span>Sintesis Akhir</span><span class="dots"></span><span>27</span></li>
+          </ul>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>iii<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">Panduan</div>
+          <h2 class="chapter-title">Petunjuk Penggunaan</h2>
+          <div class="ornament-rule"><span class="line"></span><span class="glyph">❖</span><span class="line"></span></div>
+          <p>Dokumen ini terdiri atas dua bagian yang saling melengkapi:</p>
+          <div class="callout">
+            <span class="callout-title">Bagian I — HLT (Hipotetik)</span>
+            <p style="margin: 0; font-size: 11.5px;">Rancangan teoretis untuk setiap Situasi Didaktis (SD). Memuat Tujuan Pembelajaran, Aktivitas (5 fase SCALE), dan Hipotesis Proses Belajar untuk masing-masing profil AQ.</p>
+          </div>
+          <div class="callout emerald">
+            <span class="callout-title">Bagian II — ALT &amp; DDE (Empiris)</span>
+            <p style="margin: 0; font-size: 11.5px;">Capaian aktual hasil implementasi: tujuan tercapai, aktivitas yang muncul, status resolusi <em>learning obstacles</em>, antisipasi didaktis pedagogis (ADP) baru, dan implikasi pedagogis.</p>
+          </div>
+          <h4 class="sub">Cara Membaca</h4>
+          <p style="font-size: 11.5px;">Untuk pemahaman utuh, baca per <strong>Situasi Didaktis</strong>: rancangan HLT (Bagian I) lalu rujuk ke ALT (Bagian II) untuk melihat perbandingan dan revisi. Bagian akhir merangkum formalisasi alat bantu visual dan Protokol 4 Langkah yang lahir dari temuan empiris.</p>
+          <div class="callout maroon">
+            <span class="callout-title">Legenda Status DDE</span>
+            <p style="margin: 0; font-size: 11px;"><strong>✓ Terkonfirmasi</strong> — efektif, dipertahankan · <strong>↻ Direvisi</strong> — disempurnakan berdasarkan temuan · <strong>+ Ditambahkan</strong> — komponen baru dari respons aktual siswa</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>iv<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 3 : PART I divider + Ikhtisar 4 SD -->
+    <div class="leaf" data-leaf="3">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="chapter-divider">
+            <div class="roman">I</div>
+            <div class="label">Bagian Pertama</div>
+            <h1>Hypothetical<br/>Learning Trajectory</h1>
+            <div class="ornament-rule"><span class="line"></span><span class="glyph">❖</span><span class="line"></span></div>
+            <p class="summary">Rancangan lintasan belajar hipotetik — empat situasi didaktis progresif yang dirancang sebelum implementasi, dengan diferensiasi scaffolding berdasarkan profil <em>adversity quotient</em>.</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>1<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">Ikhtisar HLT</div>
+          <h3 class="section">Empat Situasi Didaktis Progresif</h3>
+          <p>Pembelajaran SPLTDV dirancang dalam empat tahapan kontekstual yang saling membangun, masing-masing 90 menit dengan metode SCALE.</p>
+          <table>
+            <thead><tr><th>SD</th><th>Konteks &amp; Fokus</th><th>Tujuan Utama</th></tr></thead>
+            <tbody>
+              <tr><td><strong>SD1</strong></td><td><strong>Jajanan Kantin Sekolah</strong><br/><em>Persamaan vs Pertidaksamaan</em></td><td>Membedakan karakteristik solusi tunggal vs beragam; memodelkan kendala bersamaan</td></tr>
+              <tr><td><strong>SD2</strong></td><td><strong>Usaha Fotokopi Pak Budi</strong><br/><em>Tabel → Grafik → Interpretasi</em></td><td>Transisi numerik ke grafis multi-kuadran; titik impas; bilangan bertanda kontekstual</td></tr>
+              <tr><td><strong>SD3</strong></td><td><strong>Perencanaan Kegiatan Sekolah</strong><br/><em>Klasifikasi 3 Jenis Daerah</em></td><td>Identifikasi daerah Terbatas, Tak Terbatas, dan Kosong; aturan operasi negatif</td></tr>
+              <tr><td><strong>SD4</strong></td><td><strong>Toko Roti "Berkah Rezeki"</strong><br/><em>Optimasi Titik Sudut + Sense-Making</em></td><td>Integrasi semua konsep; metode titik sudut; adaptasi solusi non-integer ke konteks</td></tr>
+            </tbody>
+          </table>
+          <div class="callout emerald">
+            <span class="callout-title">Lima Fase SCALE</span>
+            <p style="margin: 0; font-size: 11px;"><strong>S</strong>et Up Goals · <strong>C</strong>ontradict Adidactic · <strong>A</strong>nonymous Gallery · <strong>L</strong>ock-In · <strong>E</strong>xtended</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>2<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 4 : Diferensiasi Scaffolding 3 Profil -->
+    <div class="leaf" data-leaf="4">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="eyebrow">Bagian I · Diferensiasi</div>
+          <h3 class="section">Scaffolding Berdasarkan Adversity Quotient</h3>
+          <p>Tiga jenis <em>scaffolding</em> berbeda dirancang sesuai karakter masing-masing profil ketahanan menghadapi kesulitan.</p>
+          <div class="profile-grid">
+            <div class="profile-card" style="border-top: 4px solid var(--maroon);">
+              <div class="profile-name" style="color:var(--maroon);">QUITTER</div>
+              <div class="profile-tag">Scaffolding Prosedural</div>
+              <p style="font-size: 10.5px; margin: 6px 0 0 0; line-height: 1.55;"><strong>Prioritas:</strong> Psikologis<br/>• Lingkungan aman psikologis<br/>• <em>Worked examples</em> + template<br/>• Penguatan positif berkelanjutan<br/>• Pengalaman sukses bertahap<br/>• <em>Wait time</em> 10–12 detik<br/><strong>Asesmen:</strong> Presentasi Lisan</p>
+            </div>
+            <div class="profile-card" style="border-top: 4px solid var(--gold-deep);">
+              <div class="profile-name" style="color:var(--gold-deep);">CAMPER</div>
+              <div class="profile-tag">Scaffolding Metakognitif</div>
+              <p style="font-size: 10.5px; margin: 6px 0 0 0; line-height: 1.55;"><strong>Prioritas:</strong> Motivasional<br/>• Pertanyaan metakognitif<br/>• <em>Schema building</em> &amp; bridging<br/>• Tantangan bertingkat<br/>• Koneksi antar representasi<br/>• Protokol 4 Langkah<br/><strong>Asesmen:</strong> Laporan Tertulis</p>
+            </div>
+            <div class="profile-card" style="border-top: 4px solid var(--emerald-deep);">
+              <div class="profile-name" style="color:var(--emerald-deep);">CLIMBER</div>
+              <div class="profile-tag">Scaffolding Strategis</div>
+              <p style="font-size: 10.5px; margin: 6px 0 0 0; line-height: 1.55;"><strong>Prioritas:</strong> Didaktis &amp; Epistemologis<br/>• Investigasi mandiri (<em>fading</em>)<br/>• Tantangan kompleks &amp; autentik<br/>• Analisis sensitivitas<br/>• Pembuktian informal/formal<br/>• <em>Problem posing</em><br/><strong>Asesmen:</strong> Portofolio</p>
+            </div>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>3<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">Prinsip Desain</div>
+          <h3 class="section">Filosofi Lintasan Belajar Hipotetik</h3>
+          <p>HLT bukan sekadar urutan aktivitas, melainkan <strong>peta dugaan</strong> tentang bagaimana siswa akan belajar — apa yang akan mereka pikirkan, di mana mereka akan tersandung, dan bagaimana <em>scaffolding</em> dapat mendukung proses tersebut.</p>
+          <h4 class="sub">Tiga Komponen HLT</h4>
+          <table>
+            <thead><tr><th>Komponen</th><th>Fungsi</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Tujuan Pembelajaran</strong></td><td>Sasaran konseptual, prosedural, dan psikologis (AQ-responsif) yang ingin dicapai</td></tr>
+              <tr><td><strong>Aktivitas Pembelajaran</strong></td><td>Rancangan tugas dalam lima fase SCALE, terdiferensiasi per profil AQ</td></tr>
+              <tr><td><strong>Hipotesis Proses Belajar</strong></td><td>Antisipasi respons siswa &amp; prediksi pemahaman pada setiap fase</td></tr>
+            </tbody>
+          </table>
+          <div class="callout">
+            <span class="callout-title">Catatan Penting</span>
+            <p style="margin: 0; font-size: 11px;">HLT bersifat <em>hipotetik</em> — diuji melalui implementasi. Selisih antara prediksi dan kenyataan justru menjadi sumber pembelajaran terkaya bagi peneliti dan guru. Inilah yang dipotret dalam <strong>Bagian II (ALT)</strong>.</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>4<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 5 : HLT SD1 -->
+    <div class="leaf" data-leaf="5">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="eyebrow">HLT · Situasi Didaktis 1 · 90 menit</div>
+          <h3 class="section">SD1 — Konsep Dasar SPLTDV</h3>
+          <p class="lead">Konteks: <strong>Jajanan Kantin Sekolah</strong> — budget Rp 10.000, item ≤ 5, item ≥ 1. Membedakan persamaan (solusi tunggal) vs pertidaksamaan (solusi beragam).</p>
+          <h4 class="sub">Tujuan Pembelajaran</h4>
+          <table>
+            <thead><tr><th>Aspek</th><th>Sasaran</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Konseptual</strong></td><td>Karakteristik solusi tunggal vs beragam; pemenuhan beberapa kendala bersamaan</td></tr>
+              <tr><td><strong>Prosedural</strong></td><td>Model: 2000x + 3500y ≤ 10.000; x + y ≤ 5; x + y ≥ 1; x, y ≥ 0</td></tr>
+              <tr><td><strong>Psikologis</strong></td><td>Quitter: pengalaman sukses awal · Camper: motivasi intrinsik · Climber: kepuasan intelektual</td></tr>
+            </tbody>
+          </table>
+          <h4 class="sub">Aktivitas SCALE — Diferensiasi Singkat</h4>
+          <table>
+            <thead><tr><th>Fase</th><th>Quitter</th><th>Camper</th><th>Climber</th></tr></thead>
+            <tbody>
+              <tr><td><strong>S</strong> (15')</td><td>Demonstrasi konkret</td><td>Diskusi analitis</td><td>Investigasi mandiri</td></tr>
+              <tr><td><strong>C</strong> (30')</td><td><em>Worked examples</em> + tabel</td><td>Eksplorasi terpandu</td><td><em>Fading support</em></td></tr>
+              <tr><td><strong>A</strong> (20')</td><td>Rotasi galeri anonim</td><td>Observasi pola</td><td>Evaluasi kritis</td></tr>
+              <tr><td><strong>L</strong> (20')</td><td>Definisi sederhana</td><td>Koneksi konseptual</td><td>Bridging program linear</td></tr>
+              <tr><td><strong>E</strong> (5')</td><td>Tabel basket terbantu</td><td>Pendekatan sistematis</td><td>Strategi mandiri</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>5<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">SD1 · Hipotesis Proses Belajar</div>
+          <h3 class="section">Antisipasi Respons &amp; Prediksi Pemahaman</h3>
+          <div class="callout maroon">
+            <span class="callout-title">Profil Quitter</span>
+            <p style="margin: 0; font-size: 11px;"><strong>Antisipasi:</strong> menghindari tugas, siklus kecemasan-penghindaran, meminta bantuan terus-menerus, ketergantungan tinggi pada <em>scaffolding</em>.</p>
+            <p style="margin: 6px 0 0 0; font-size: 11px;"><strong>Prediksi:</strong> dengan <em>worked examples</em> + tabel, mampu menemukan min. 3 kombinasi valid; pemahaman formal dasar SPLTDV terbentuk; transfer awal berhasil dengan panduan.</p>
+          </div>
+          <div class="callout">
+            <span class="callout-title">Profil Camper</span>
+            <p style="margin: 0; font-size: 11px;"><strong>Antisipasi:</strong> menyelesaikan tugas tanpa eksplorasi mendalam, fokus pada jawaban benar, prosedur benar tetapi kesulitan generalisasi.</p>
+            <p style="margin: 6px 0 0 0; font-size: 11px;"><strong>Prediksi:</strong> memahami pola dan menjelaskan <em>reasoning</em>, membandingkan dengan persamaan; <em>schema building</em> memfasilitasi transfer parsial; bridging eksplisit diperlukan ke masalah basket.</p>
+          </div>
+          <div class="callout emerald">
+            <span class="callout-title">Profil Climber</span>
+            <p style="margin: 0; font-size: 11px;"><strong>Antisipasi:</strong> langsung ke generalisasi, mencari tantangan sendiri, fokus pada kompleksitas, generalisasi prematur.</p>
+            <p style="margin: 6px 0 0 0; font-size: 11px;"><strong>Prediksi:</strong> memahami konsep dalam &lt; 15 menit, menemukan semua solusi dan pola umum, analisis dampak batasan tambahan; bridging mandiri ke program linear.</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>6<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 6 : HLT SD2 -->
+    <div class="leaf" data-leaf="6">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="eyebrow">HLT · Situasi Didaktis 2 · 90 menit</div>
+          <h3 class="section">SD2 — Representasi Grafis</h3>
+          <p class="lead">Konteks: <strong>Usaha Fotokopi Pak Budi</strong> — model y = 100x − 500.000. Transisi dari tabel ke grafik multi-kuadran, titik impas, dan interpretasi positif/negatif.</p>
+          <h4 class="sub">Tujuan Pembelajaran</h4>
+          <table>
+            <thead><tr><th>Aspek</th><th>Sasaran</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Konseptual</strong></td><td>Transisi numerik (tabel) → grafis (Kartesius); makna +/− kontekstual; titik impas (<em>break-even</em>)</td></tr>
+              <tr><td><strong>Prosedural</strong></td><td>Bangun model y = 100x − 500.000; tabel nilai; <em>plotting</em>; kode warna hijau (untung) / merah (rugi)</td></tr>
+              <tr><td><strong>Psikologis</strong></td><td>Quitter: visual-konkret · Camper: koneksi prosedur-makna · Climber: investigasi multi-usaha</td></tr>
+            </tbody>
+          </table>
+          <h4 class="sub">Aktivitas SCALE — Diferensiasi Singkat</h4>
+          <table>
+            <thead><tr><th>Fase</th><th>Quitter</th><th>Camper</th><th>Climber</th></tr></thead>
+            <tbody>
+              <tr><td><strong>S</strong> (15')</td><td>Latihan tanda +/−</td><td>Analisis data toko</td><td>Investigasi struktur biaya</td></tr>
+              <tr><td><strong>C</strong> (30')</td><td>Step-by-step + kode warna</td><td>Penemuan terpandu model</td><td>Konstruksi rumus mandiri</td></tr>
+              <tr><td><strong>A</strong> (15')</td><td>Akurasi <em>plotting</em></td><td>Interpretasi kontekstual</td><td>Strategi pewarnaan</td></tr>
+              <tr><td><strong>L</strong> (25')</td><td>Plot &amp; kuadran I-IV</td><td>Tabel ↔ grafik ↔ ekonomi</td><td>Karakteristik &amp; implikasi</td></tr>
+              <tr><td><strong>E</strong> (5')</td><td>Masalah serupa</td><td>Variasi struktur biaya</td><td>Perbandingan 2+ usaha</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>7<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">SD2 · Hipotesis Proses Belajar</div>
+          <h3 class="section">Antisipasi Respons &amp; Prediksi Pemahaman</h3>
+          <div class="callout maroon">
+            <span class="callout-title">Profil Quitter</span>
+            <p style="margin: 0; font-size: 11px;"><strong>Antisipasi:</strong> kesulitan tanda negatif, kecemasan dengan koordinat Kartesius, plot mekanis tanpa interpretasi.</p>
+            <p style="margin: 6px 0 0 0; font-size: 11px;"><strong>Prediksi:</strong> tabel bantuan + kode warna memfasilitasi grafik sederhana; konteks untung/rugi memberikan makna konkret pada tanda +/−; transfer terbantu dengan panduan visual.</p>
+          </div>
+          <div class="callout">
+            <span class="callout-title">Profil Camper</span>
+            <p style="margin: 0; font-size: 11px;"><strong>Antisipasi:</strong> tanda +/− dipahami prosedural, plot benar mekanis, interpretasi terbatas, kesulitan menghubungkan dengan grafik.</p>
+            <p style="margin: 6px 0 0 0; font-size: 11px;"><strong>Prediksi:</strong> penemuan terpandu membantu merumuskan persamaan; pertanyaan reflektif memicu koneksi grafik-konteks; transfer berkembang dengan bridging.</p>
+          </div>
+          <div class="callout emerald">
+            <span class="callout-title">Profil Climber</span>
+            <p style="margin: 0; font-size: 11px;"><strong>Antisipasi:</strong> penguasaan cepat konsep dasar, mencari ekstensi, fokus eksplorasi mandiri, perbandingan multi-usaha.</p>
+            <p style="margin: 6px 0 0 0; font-size: 11px;"><strong>Prediksi:</strong> memahami biaya tetap-variabel cepat; analisis multi-skenario memperdalam pemahaman; pengambilan keputusan bisnis berbasis data.</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>8<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 7 : HLT SD3 -->
+    <div class="leaf" data-leaf="7">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="eyebrow">HLT · Situasi Didaktis 3 · 90 menit</div>
+          <h3 class="section">SD3 — Klasifikasi Daerah Penyelesaian</h3>
+          <p class="lead">Konteks: <strong>Perencanaan Kegiatan Sekolah</strong> — tiga rencana berbeda yang menghasilkan daerah Terbatas, Tak Terbatas, dan Kosong. Aturan operasi dengan bilangan negatif.</p>
+          <h4 class="sub">Tujuan Pembelajaran</h4>
+          <table>
+            <thead><tr><th>Aspek</th><th>Sasaran</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Konseptual</strong></td><td>Klasifikasi 3 jenis daerah (terbatas, tak terbatas, kosong); kontradiksi antar batasan</td></tr>
+              <tr><td><strong>Prosedural</strong></td><td>Aturan pembalikan tanda (kali/bagi negatif); kriteria identifikasi cepat (Maks DAN Min, Maks ATAU Min, konflik)</td></tr>
+              <tr><td><strong>Psikologis</strong></td><td>Quitter: <em>checklist</em> visual · Camper: justifikasi logis · Climber: analisis sensitivitas</td></tr>
+            </tbody>
+          </table>
+          <h4 class="sub">Aktivitas SCALE — Diferensiasi Singkat</h4>
+          <table>
+            <thead><tr><th>Fase</th><th>Quitter</th><th>Camper</th><th>Climber</th></tr></thead>
+            <tbody>
+              <tr><td><strong>S</strong> (15')</td><td>Substitusi sederhana</td><td>Analisis "mengapa"</td><td>Investigasi operasi-orientasi</td></tr>
+              <tr><td><strong>C</strong> (30')</td><td><em>Checklist</em> "Maks? Min?"</td><td>Protokol 4 Langkah</td><td>Analisis sensitivitas + patologis</td></tr>
+              <tr><td><strong>A</strong> (20')</td><td>Strategi identifikasi</td><td>Akurasi klasifikasi</td><td>Kualitas justifikasi</td></tr>
+              <tr><td><strong>L</strong> (15')</td><td>Kriteria sederhana</td><td>Analisis ↔ geometri</td><td>Kondisi batas &amp; optimasi</td></tr>
+              <tr><td><strong>E</strong> (10')</td><td>Masalah + <em>checklist</em></td><td>Variasi struktur kendala</td><td>Sistem multi-batasan</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>9<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">SD3 · Hipotesis Proses Belajar</div>
+          <h3 class="section">Antisipasi Respons &amp; Prediksi Pemahaman</h3>
+          <div class="callout maroon">
+            <span class="callout-title">Profil Quitter</span>
+            <p style="margin: 0; font-size: 11px;"><strong>Antisipasi:</strong> kesulitan operasi negatif, kecemasan konsep abstrak, menyerah saat tidak menemukan titik potong, menebak gambar daerah.</p>
+            <p style="margin: 6px 0 0 0; font-size: 11px;"><strong>Prediksi:</strong> <em>checklist</em> visual membantu identifikasi minimal 2 dari 3 jenis daerah; contoh konkret mengurangi abstraksi; transfer awal berhasil dengan <em>checklist</em>.</p>
+          </div>
+          <div class="callout">
+            <span class="callout-title">Profil Camper</span>
+            <p style="margin: 0; font-size: 11px;"><strong>Antisipasi:</strong> aturan dipahami mekanis, kesulitan menjelaskan "mengapa", menggambar grafik lengkap padahal cukup analisis, meminta konfirmasi berulang.</p>
+            <p style="margin: 6px 0 0 0; font-size: 11px;"><strong>Prediksi:</strong> Protokol 4 Langkah memfasilitasi klasifikasi sistematis; analisis alasan pembalikan tanda membangun pemahaman konseptual; justifikasi logis mulai berkembang.</p>
+          </div>
+          <div class="callout emerald">
+            <span class="callout-title">Profil Climber</span>
+            <p style="margin: 0; font-size: 11px;"><strong>Antisipasi:</strong> penguasaan cepat, ingin geometri formal, eksplorasi ekstensi terlalu cepat, mencari pembuktian formal (<em>convex set</em>).</p>
+            <p style="margin: 6px 0 0 0; font-size: 11px;"><strong>Prediksi:</strong> analisis sensitivitas mengembangkan pemahaman parameter; kasus patologis memperdalam pemahaman topologi; analisis komprehensif sistem mandiri.</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>10<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 8 : HLT SD4 -->
+    <div class="leaf" data-leaf="8">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="eyebrow">HLT · Situasi Didaktis 4 · 90 menit</div>
+          <h3 class="section">SD4 — Integrasi Optimasi</h3>
+          <p class="lead">Konteks: <strong>Toko Roti "Berkah Rezeki"</strong> — kendala 5000x + 8000y ≤ 50.000; 0,5x + y ≤ 6; x ≥ 1; y ≥ 1. Metode titik sudut + <em>sense-making</em> solusi non-integer.</p>
+          <h4 class="sub">Tujuan Pembelajaran</h4>
+          <table>
+            <thead><tr><th>Aspek</th><th>Sasaran</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Konseptual</strong></td><td>Integrasi pemodelan, grafik, daerah, optimasi; nilai optimal selalu di titik sudut; <em>sense-making</em> solusi praktis</td></tr>
+              <tr><td><strong>Prosedural</strong></td><td>Metode titik sudut 5 langkah: model → daerah → titik sudut → fungsi objektif → kepraktisan</td></tr>
+              <tr><td><strong>Psikologis</strong></td><td>Quitter: template terstruktur · Camper: 2+ representasi &amp; justifikasi · Climber: sensitivitas + multi-kriteria</td></tr>
+            </tbody>
+          </table>
+          <h4 class="sub">Aktivitas SCALE — Diferensiasi Singkat</h4>
+          <table>
+            <thead><tr><th>Fase</th><th>Quitter</th><th>Camper</th><th>Climber</th></tr></thead>
+            <tbody>
+              <tr><td><strong>S</strong> (10')</td><td>Simulasi sederhana</td><td>Diskusi komponen kendala</td><td>Prediksi strategi</td></tr>
+              <tr><td><strong>C</strong> (40')</td><td>Template + <em>checklist</em></td><td>Multi-representasi + reflektif</td><td>Sensitivitas + multi-kriteria</td></tr>
+              <tr><td><strong>A</strong> (15')</td><td>Strategi solusi non-integer</td><td>Evaluasi <em>sense-making</em></td><td>Diskusi <em>binding constraint</em></td></tr>
+              <tr><td><strong>L</strong> (15')</td><td>Bilangan bulat terdekat</td><td>Koneksi representasi</td><td>Teorema titik sudut</td></tr>
+              <tr><td><strong>E</strong> (10')</td><td>Masalah + panduan</td><td>Justifikasi praktis</td><td>3 produk + multi-kriteria</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>11<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">SD4 · Hipotesis Proses Belajar</div>
+          <h3 class="section">Antisipasi Respons &amp; Prediksi Pemahaman</h3>
+          <div class="callout maroon">
+            <span class="callout-title">Profil Quitter</span>
+            <p style="margin: 0; font-size: 11px;"><strong>Antisipasi:</strong> bingung dengan banyaknya kendala, butuh motivasi awal kuat, kesulitan setiap langkah tanpa template, bingung solusi non-integer.</p>
+            <p style="margin: 6px 0 0 0; font-size: 11px;"><strong>Prediksi:</strong> simulasi konkret memudahkan konteks; template + <em>checklist</em> memfasilitasi penyelesaian bertahap; bantuan bilangan bulat mengembangkan <em>sense-making</em>; minimal 2 solusi diterapkan.</p>
+          </div>
+          <div class="callout">
+            <span class="callout-title">Profil Camper</span>
+            <p style="margin: 0; font-size: 11px;"><strong>Antisipasi:</strong> memahami konteks cepat, beragam representasi muncul, perlu panduan untuk justifikasi.</p>
+            <p style="margin: 6px 0 0 0; font-size: 11px;"><strong>Prediksi:</strong> integrasi multi-representasi memperkuat pemahaman; pertanyaan reflektif mengembangkan metakognisi; <em>sense-making</em> bilangan bulat memperdalam pemahaman praktis; transfer memadai.</p>
+          </div>
+          <div class="callout emerald">
+            <span class="callout-title">Profil Climber</span>
+            <p style="margin: 0; font-size: 11px;"><strong>Antisipasi:</strong> langsung memprediksi strategi, tantangan multi-produk, penyelesaian mandiri, analisis sensitivitas parameter.</p>
+            <p style="margin: 6px 0 0 0; font-size: 11px;"><strong>Prediksi:</strong> analisis sensitivitas membangun pemahaman relasional mendalam; identifikasi <em>binding constraint</em>; eksplorasi multi-kriteria; pemahaman teorema titik sudut secara informal.</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>12<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 9 : PART II divider + Sintesis Perubahan -->
+    <div class="leaf" data-leaf="9">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="chapter-divider">
+            <div class="roman">II</div>
+            <div class="label">Bagian Kedua</div>
+            <h1>Actual Learning Trajectory<br/>&amp; Desain Didaktis Empiris</h1>
+            <div class="ornament-rule"><span class="line"></span><span class="glyph">❖</span><span class="line"></span></div>
+            <p class="summary">Lintasan belajar aktual hasil implementasi — analisis metapedadidaktik dan retrospektif yang menghasilkan DDE: <em>+16 ADP baru</em>, formalisasi alat bantu visual, Protokol 4 Langkah, dan panduan Desmos.</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>13<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">Ikhtisar ALT</div>
+          <h3 class="section">Sintesis Perubahan DDH → DDE</h3>
+          <p>Sembilan revisi utama yang lahir dari analisis empiris terhadap rancangan hipotetik:</p>
+          <table>
+            <thead><tr><th>Aspek</th><th>DDH (Hipotetik)</th><th>DDE (Empiris)</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>ADP</td><td>Prediksi teoretis</td><td>+16 ADP baru</td><td><strong style="color:var(--emerald-deep);">+ Tambah</strong></td></tr>
+              <tr><td>Kode Warna SD2</td><td>Tidak spesifik</td><td>Hijau/Merah wajib</td><td><strong style="color:var(--gold-deep);">↻ Revisi</strong></td></tr>
+              <tr><td>Stabilo SD3</td><td>Tidak ada</td><td>Hijau/Biru/Merah</td><td><strong style="color:var(--emerald-deep);">+ Tambah</strong></td></tr>
+              <tr><td>Protokol 4 Langkah</td><td>Tidak ada</td><td>Formalisasi sistematis</td><td><strong style="color:var(--emerald-deep);">+ Tambah</strong></td></tr>
+              <tr><td>"Tabel sebagai Jembatan"</td><td>Implisit</td><td>Eksplisit</td><td><strong style="color:var(--gold-deep);">↻ Revisi</strong></td></tr>
+              <tr><td>Panduan Desmos</td><td>Opsional</td><td>Eksplisit (Climber)</td><td><strong style="color:var(--gold-deep);">↻ Revisi</strong></td></tr>
+              <tr><td><em>Binding Constraint</em></td><td>Tidak ada</td><td>Pengayaan Climber</td><td><strong style="color:var(--emerald-deep);">+ Tambah</strong></td></tr>
+              <tr><td><em>Peer Teaching</em></td><td>Tidak terstruktur</td><td>Terstruktur di Gallery</td><td><strong style="color:var(--gold-deep);">↻ Revisi</strong></td></tr>
+              <tr><td><em>Productive Struggle</em></td><td>Tidak ada</td><td>Desain eksplisit</td><td><strong style="color:var(--emerald-deep);">+ Tambah</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>14<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 10 : Komponen Terkonfirmasi -->
+    <div class="leaf" data-leaf="10">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="eyebrow">DDE · Komponen Efektif</div>
+          <h3 class="section">Komponen DDH yang Terkonfirmasi</h3>
+          <p>Lima komponen rancangan hipotetik terbukti efektif dan dipertahankan utuh dalam DDE.</p>
+          <table>
+            <thead><tr><th>Komponen</th><th>Bukti Empiris</th></tr></thead>
+            <tbody>
+              <tr><td><strong>4 Situasi Didaktis Progresif</strong></td><td>Progresivitas SD1→SD4 membangun pemahaman bertahap; <strong>14 dari 18 LO</strong> berhasil diresolusi</td></tr>
+              <tr><td><strong>Metode SCALE (5 Fase)</strong></td><td>Lima fase terimplementasi optimal; <em>Anonymous Gallery</em> sangat efektif menciptakan keamanan psikologis</td></tr>
+              <tr><td><strong>Scaffolding 3 Jenis</strong></td><td>Prosedural (Q), Metakognitif (C), Strategis (Cl) tervalidasi melalui triangulasi bukti</td></tr>
+              <tr><td><strong>Konteks Autentik Bertingkat</strong></td><td>Kantin, fotokopi, perencanaan, toko roti — semua relevan, menurunkan kecemasan</td></tr>
+              <tr><td><strong>Prinsip <em>Fading</em></strong></td><td>Quitter: dari ketergantungan penuh → mandiri dengan <em>checklist</em> di SD4</td></tr>
+            </tbody>
+          </table>
+          <div class="callout emerald">
+            <span class="callout-title">Temuan Utama</span>
+            <p style="margin: 0; font-size: 11px;">Implementasi mengonfirmasi bahwa kerangka HLT secara umum kokoh — yang perlu diperhalus adalah <strong>antisipasi mikro</strong>: respons spesifik siswa yang tidak terduga, alat bantu yang muncul dari inisiatif siswa, dan momen-momen <em>productive struggle</em> yang perlu didesain secara sengaja.</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>15<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">Metodologi</div>
+          <h3 class="section">Cara Membaca Bagian II</h3>
+          <p>Setiap Situasi Didaktis disajikan dalam dua halaman aktual:</p>
+          <h4 class="sub">Halaman Pertama — Capaian &amp; Aktivitas</h4>
+          <p style="font-size: 11.5px;">Memuat <strong>Tujuan Pembelajaran Aktual</strong> (perbandingan DDH vs capaian empiris dengan kode bukti seperti TRN, ART, OBS, WWC) dan <strong>Aktivitas Aktual</strong> yang muncul di kelas.</p>
+          <h4 class="sub">Halaman Kedua — LO Resolution &amp; ADP Baru</h4>
+          <p style="font-size: 11.5px;">Memuat <strong>Status Resolusi Learning Obstacles</strong> per LO yang relevan, <strong>Antisipasi Didaktis Pedagogis (ADP) Baru</strong> yang muncul dari respons tak terantisipasi, dan <strong>Implikasi Pedagogis</strong>.</p>
+          <div class="callout">
+            <span class="callout-title">Kode Bukti Empiris</span>
+            <p style="margin: 0; font-size: 11px;"><strong>TRN</strong> — Transkrip dialog · <strong>ART</strong> — Artefak pekerjaan siswa · <strong>OBS</strong> — Observasi waktu nyata · <strong>WWC</strong> — Wawancara · <strong>SU/CT/AG/LI/EV</strong> — fase SCALE</p>
+          </div>
+          <div class="callout maroon">
+            <span class="callout-title">Subjek Tipikal</span>
+            <p style="margin: 0; font-size: 11px;"><strong>MZ</strong> — siswa profil Quitter · <strong>NF</strong> — siswa profil Camper · <strong>F</strong> — siswa profil Climber. Inisial-inisial ini muncul berulang sebagai eksemplar lintas SD.</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>16<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 11 : ALT SD1 -->
+    <div class="leaf" data-leaf="11">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="eyebrow">ALT · Situasi Didaktis 1</div>
+          <h3 class="section">SD1 Aktual — Konsep Dasar</h3>
+          <p class="lead">Konteks <strong>jajanan kantin</strong> efektif menurunkan kecemasan lintas profil AQ. Fondasi kognitif terbentuk kokoh untuk perbedaan persamaan vs pertidaksamaan.</p>
+          <h4 class="sub">Tujuan Aktual: DDH → Capaian Empiris</h4>
+          <table>
+            <thead><tr><th>Tujuan DDH</th><th>Capaian Aktual (Bukti)</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Bedakan solusi tunggal vs beragam</td><td>MZ: kesadaran verbal [TRN-SU-18], koreksi mandiri · NF: catatan "Persamaan→terbatas, Pertidaksamaan→banyak" · F: langsung visualisasi grafik</td><td><strong style="color:var(--emerald-deep);">✓</strong></td></tr>
+              <tr><td>Temukan kombinasi memenuhi batasan</td><td>Q: 6 kombinasi valid · C: semua kombinasi + pola · Cl: eksplorasi sistem multivariabel</td><td><strong style="color:var(--emerald-deep);">✓</strong></td></tr>
+              <tr><td>Quitter: partisipasi tanpa kecemasan</td><td>Kecemasan menurun · NAMUN: butuh <em>wait time</em> 10–12 detik (lebih lama dari 3–5)</td><td><strong style="color:var(--gold-deep);">↻</strong></td></tr>
+            </tbody>
+          </table>
+          <h4 class="sub">Aktivitas Aktual — Highlights</h4>
+          <table>
+            <thead><tr><th>Fase</th><th>Quitter (MZ)</th><th>Camper (NF)</th><th>Climber (F)</th></tr></thead>
+            <tbody>
+              <tr><td><strong>S</strong> 15'</td><td>Diam, dialog dengan validasi → catatan pertama</td><td>Angkat tangan langsung → refleksi "mengapa"</td><td>Sketsa grafik awal mandiri</td></tr>
+              <tr><td><strong>C</strong> 30'</td><td><em>Worked example</em> → terpandu → mandiri (6 kombinasi)</td><td><em>Schema building</em>; justifikasi tertulis spontan</td><td><em>Problem posing</em>; eksplorasi multivariabel</td></tr>
+              <tr><td><strong>A-L-E</strong></td><td>Berani berbagi; aplikasi benar dengan kerangka minimal</td><td>Justifikasi spontan; transfer berhasil</td><td><em>Bridging</em> ke program linear; eksplorasi lanjutan</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>17<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">SD1 · Resolusi LO &amp; ADP Baru</div>
+          <h3 class="section">Status Resolusi Learning Obstacles</h3>
+          <table>
+            <thead><tr><th>LO</th><th>Awal → Akhir</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><strong>LO-01</strong></td><td>Tidak bedakan karakteristik → paham &amp; aplikasikan</td><td><strong style="color:var(--emerald-deep);">✓ Substansial</strong></td></tr>
+              <tr><td><strong>LO-02</strong></td><td>Pasif tunggu instruksi → kemandirian meningkat</td><td><strong style="color:var(--emerald-deep);">✓ Substansial</strong></td></tr>
+              <tr><td><strong>LO-03</strong></td><td>Kecemasan tinggi → menurun (anonimitas efektif)</td><td><strong style="color:var(--emerald-deep);">✓ Substansial</strong></td></tr>
+              <tr><td><strong>LO-07</strong></td><td>Prosedur tanpa alasan → justifikasi spontan</td><td><strong style="color:var(--emerald-deep);">✓ Substansial</strong></td></tr>
+              <tr><td><strong>LO-08</strong></td><td>Belum teraktivasi → adaptasi berhasil dengan kerangka</td><td><strong style="color:var(--emerald-deep);">✓ Substansial</strong></td></tr>
+              <tr><td><strong>LO-13</strong></td><td>Konsisten terlibat → pemahaman relasional</td><td><strong style="color:var(--emerald-deep);">✓ Substansial</strong></td></tr>
+            </tbody>
+          </table>
+          <h4 class="sub">ADP Baru (Revisi DDE)</h4>
+          <div class="callout maroon">
+            <span class="callout-title">Quitter</span>
+            <p style="margin: 0; font-size: 11px;">→ <em>"Coba dulu langkah 1–2, baru minta contoh tambahan jika stuck"</em><br/>→ <em>"Hasil berbeda tidak berarti salah, ada banyak jawaban benar"</em></p>
+          </div>
+          <div class="callout">
+            <span class="callout-title">Camper</span>
+            <p style="margin: 0; font-size: 11px;">→ <em>"Bisakah kamu temukan POLA dari kombinasi-kombinasi valid ini?"</em></p>
+          </div>
+          <div class="callout emerald">
+            <span class="callout-title">Climber</span>
+            <p style="margin: 0; font-size: 11px;">→ <em>"Ide bagus! Sekarang buktikan dengan minimal 3 contoh berbeda"</em></p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>18<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 12 : ALT SD2 -->
+    <div class="leaf" data-leaf="12">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="eyebrow">ALT · Situasi Didaktis 2</div>
+          <h3 class="section">SD2 Aktual — Representasi Grafis</h3>
+          <p class="lead">Transisi kognitif dari tabuler-numerik menuju representasi grafis multi-kuadran berhasil. Konsep <strong>"Tabel sebagai Jembatan"</strong> muncul spontan dari siswa Quitter.</p>
+          <h4 class="sub">Tujuan Aktual: DDH → Capaian Empiris</h4>
+          <table>
+            <thead><tr><th>Tujuan DDH</th><th>Capaian Aktual</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Transisi tabel → grafik multi-kuadran</td><td>Q: "Tabel sebagai jembatan" muncul sendiri · C: koneksi multi-representasi kuat · Cl: analisis sensitivitas + <em>problem posing</em></td><td><strong style="color:var(--emerald-deep);">✓</strong></td></tr>
+              <tr><td>Bilangan bertanda kontekstual</td><td>Q: kode warna manual efektif · C: interpretasi kontekstual mendalam · Cl: perbandingan multi-usaha spontan</td><td><strong style="color:var(--gold-deep);">↻</strong> Wajibkan kode warna</td></tr>
+              <tr><td>Camper: prosedur ↔ makna</td><td>Pemodelan mandiri lebih efektif daripada model jadi · multi-representasi spontan · justifikasi bisnis</td><td><strong style="color:var(--emerald-deep);">✓</strong></td></tr>
+            </tbody>
+          </table>
+          <h4 class="sub">Aktivitas Aktual — Highlights</h4>
+          <table>
+            <thead><tr><th>Fase</th><th>Quitter (MZ)</th><th>Camper (NF)</th><th>Climber (F)</th></tr></thead>
+            <tbody>
+              <tr><td><strong>S</strong> 15'</td><td>Latihan tanda +/− konkret; antusias konteks familiar</td><td>Analisis data toko, lihat pola input-output</td><td>Investigasi struktur biaya tetap-variabel</td></tr>
+              <tr><td><strong>C</strong> 30'</td><td>5 langkah eksplisit + <em>fading</em>; "tabel sebagai jembatan" muncul</td><td>Bangun y=100x−500.000 mandiri; pertanyaan koneksi gradien-konteks</td><td>Multi-skenario; analisis sensitivitas; <em>problem posing</em></td></tr>
+              <tr><td><strong>A-L-E</strong></td><td><em>Checklist</em> peer review; transfer dengan angka sederhana</td><td>Tabel ↔ grafik ↔ ekonomi; variasi struktur biaya</td><td>Karakteristik fungsi linear; perbandingan 2+ usaha</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>19<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">SD2 · Resolusi LO &amp; ADP Baru</div>
+          <h3 class="section">Status Resolusi Learning Obstacles</h3>
+          <table>
+            <thead><tr><th>LO</th><th>Awal → Akhir</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><strong>LO-02</strong></td><td>Sulit transisi contoh → mandiri → kerja mandiri dengan alat grafik</td><td><strong style="color:var(--emerald-deep);">✓ Substansial</strong></td></tr>
+              <tr><td><strong>LO-04</strong></td><td>Sulit interpretasi geometris → koneksi 3 representasi jelas</td><td><strong style="color:var(--emerald-deep);">✓ Substansial</strong></td></tr>
+              <tr><td><strong>LO-08</strong></td><td>Perlu dorongan eksplorasi → eksplorasi spontan tanpa dorongan</td><td><strong style="color:var(--emerald-deep);">✓ Substansial</strong></td></tr>
+              <tr><td><strong>LO-10</strong></td><td>Sulit koneksi multi-representasi → koneksi kuat &amp; mendalam</td><td><strong style="color:var(--emerald-deep);">✓✓ Kuat</strong></td></tr>
+              <tr><td><strong>LO-14</strong></td><td>Risiko kehilangan keterlibatan → keterlibatan terjaga, geometris lanjut</td><td><strong style="color:var(--emerald-deep);">✓ Substansial</strong></td></tr>
+            </tbody>
+          </table>
+          <h4 class="sub">ADP Baru (Revisi DDE)</h4>
+          <div class="callout maroon">
+            <span class="callout-title">Quitter</span>
+            <p style="margin: 0; font-size: 11px;">→ Sediakan <strong>kertas berpetak dengan skala sudah ditentukan</strong> untuk membantu siswa yang kesulitan menentukan skala sumbu.</p>
+          </div>
+          <div class="callout">
+            <span class="callout-title">Camper</span>
+            <p style="margin: 0; font-size: 11px;">→ <em>"Jelaskan KONEKSI antara tabelmu dan grafikmu"</em> — perkuat pemahaman multi-representasi yang spontan.</p>
+          </div>
+          <div class="callout emerald">
+            <span class="callout-title">Climber</span>
+            <p style="margin: 0; font-size: 11px;">→ <em>"Faktor apa saja yang perlu dipertimbangkan dalam memilih usaha?"</em> — ketika siswa membandingkan 3 usaha sekaligus.</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>20<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 13 : ALT SD3 -->
+    <div class="leaf" data-leaf="13">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="eyebrow">ALT · Situasi Didaktis 3</div>
+          <h3 class="section">SD3 Aktual — Klasifikasi Daerah</h3>
+          <p class="lead">Temuan penting: siswa Quitter <strong>mengembangkan sistem stabilo 3 warna</strong> sendiri (Hijau/Biru/Merah). Camper memanfaatkan <strong>Protokol 4 Langkah</strong> secara efektif.</p>
+          <h4 class="sub">Tujuan Aktual: DDH → Capaian Empiris</h4>
+          <table>
+            <thead><tr><th>Tujuan DDH</th><th>Capaian Aktual</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>3 jenis daerah: terbatas, tak terbatas, kosong</td><td>Q: stabilo 3 warna mandiri · C: Protokol 4 Langkah efektif · Cl: analisis sensitivitas + pembuktian informal</td><td><strong style="color:var(--gold-deep);">↻</strong> Formalisasi alat</td></tr>
+              <tr><td>Aturan operasi negatif</td><td>Q: latihan prasyarat 3 soal efektif · C: analisis "mengapa" → konseptual · Cl: investigasi operasi-orientasi</td><td><strong style="color:var(--emerald-deep);">✓</strong> 5 menit cukup</td></tr>
+              <tr><td>Quitter: <em>checklist</em> visual</td><td>Inisiatif stabilo menunjukkan internalisasi · <em>peer teaching</em> spontan di Gallery · cross-fertilization profil</td><td><strong style="color:var(--gold-deep);">↻</strong> Adopsi standar</td></tr>
+            </tbody>
+          </table>
+          <h4 class="sub">Aktivitas Aktual — Highlights</h4>
+          <table>
+            <thead><tr><th>Fase</th><th>Quitter (MZ)</th><th>Camper (NF)</th><th>Climber (F)</th></tr></thead>
+            <tbody>
+              <tr><td><strong>S</strong> 15'</td><td>Substitusi sederhana; diskusi 3 rencana</td><td>Analisis "mengapa tanda berubah"; prediksi jenis daerah</td><td>Operasi negatif ↔ orientasi; analisis struktur</td></tr>
+              <tr><td><strong>C</strong> 30'</td><td><em>Checklist</em>; <strong>stabilo 3 warna mandiri</strong>; <em>peer teaching</em> spontan</td><td><strong>Protokol 4 Langkah</strong>; justifikasi "karena…"; deteksi kontradiksi aljabar</td><td>Analisis sensitivitas; pembuktian informal; kasus patologis</td></tr>
+              <tr><td><strong>A-L-E</strong></td><td>Stabilo diadopsi kelompok lain; transfer + <em>checklist</em></td><td>Mengajar teman = paham mendalam; variasi kendala</td><td>Diskusi kasus patologis; sistem kompleks</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>21<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">SD3 · Resolusi LO &amp; ADP Baru</div>
+          <h3 class="section">Status Resolusi Learning Obstacles</h3>
+          <table>
+            <thead><tr><th>LO</th><th>Awal → Akhir</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><strong>LO-04</strong></td><td>Tidak bedakan 3 jenis → paham &amp; aplikasikan akurat</td><td><strong style="color:var(--emerald-deep);">✓ Substansial</strong></td></tr>
+              <tr><td><strong>LO-05</strong></td><td>Tidak paham konflik → deteksi numerik (Q), konseptual (C), analitis (Cl)</td><td><strong style="color:var(--emerald-deep);">✓✓ Kuat</strong></td></tr>
+              <tr><td><strong>LO-06</strong></td><td>Perlu alat bantu visual → alat bantu mandiri dikembangkan siswa</td><td><strong style="color:var(--emerald-deep);">✓ Substansial</strong></td></tr>
+              <tr><td><strong>LO-09</strong></td><td>Sulit analisis tanpa kerangka → kerangka terinternalisasi</td><td><strong style="color:var(--emerald-deep);">✓✓ Kuat</strong></td></tr>
+              <tr><td><strong>LO-10</strong></td><td>Prosedur tanpa pemahaman → justifikasi konseptual spontan</td><td><strong style="color:var(--emerald-deep);">✓ Substansial</strong></td></tr>
+              <tr><td><strong>LO-14</strong></td><td>Risiko <em>plateau</em> → tercegah, pemahaman relasional kuat</td><td><strong style="color:var(--emerald-deep);">✓✓ Kuat</strong></td></tr>
+            </tbody>
+          </table>
+          <h4 class="sub">ADP Baru (Revisi DDE)</h4>
+          <div class="callout maroon">
+            <span class="callout-title">Quitter</span>
+            <p style="margin: 0; font-size: 11px;">→ <strong>Adopsi sebagai standar</strong>: Hijau (Terbatas), Biru (Tak Terbatas), Merah (Kosong). Inisiatif siswa difomalisasi.</p>
+          </div>
+          <div class="callout">
+            <span class="callout-title">Camper</span>
+            <p style="margin: 0; font-size: 11px;">→ Berikan <strong>ruang dalam Anonymous Gallery</strong> untuk menjelaskan strategi protokol kepada teman.</p>
+          </div>
+          <div class="callout emerald">
+            <span class="callout-title">Climber</span>
+            <p style="margin: 0; font-size: 11px;">→ <em>"Jika hanya bisa mengubah satu batasan, mana paling berdampak?"</em> — analisis sensitivitas terarah.</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>22<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 14 : ALT SD4 -->
+    <div class="leaf" data-leaf="14">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="eyebrow">ALT · Situasi Didaktis 4</div>
+          <h3 class="section">SD4 Aktual — Integrasi Optimasi</h3>
+          <p class="lead">Kulminasi pembelajaran. Transformasi signifikan: Quitter <em>mandiri dengan checklist</em>; Camper <em>inquiry mindset</em>; Climber <em>analisis strategis</em>. Konsep <strong>binding constraints</strong> muncul spontan.</p>
+          <h4 class="sub">Tujuan Aktual: DDH → Capaian Empiris</h4>
+          <table>
+            <thead><tr><th>Tujuan DDH</th><th>Capaian Aktual</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Integrasi konsep + titik sudut</td><td>Q: pemodelan mandiri tanpa contoh ("Tidak butuh contoh detail lagi") · C: multi-strategi + verifikasi mandiri · Cl: setup slider Desmos mandiri + binding constraints</td><td><strong style="color:var(--emerald-deep);">✓</strong></td></tr>
+              <tr><td><em>Sense-making</em> non-integer</td><td>Camper menemukan sendiri "<em>Optimal matematis ≠ optimal praktis</em>" — discovery transformatif lewat <em>productive struggle</em></td><td><strong style="color:var(--gold-deep);">↻</strong> Desain eksplisit</td></tr>
+              <tr><td>Climber: sensitivitas + generalisasi</td><td>Eksplorasi skenario dengan slider Desmos · discovery <em>binding constraints</em> · analisis multi-kriteria dengan <em>trade-off</em></td><td><strong style="color:var(--gold-deep);">↻</strong> Formalisasi Desmos</td></tr>
+            </tbody>
+          </table>
+          <h4 class="sub">Aktivitas Aktual — Highlights</h4>
+          <table>
+            <thead><tr><th>Fase</th><th>Quitter (MZ)</th><th>Camper (NF)</th><th>Climber (F)</th></tr></thead>
+            <tbody>
+              <tr><td><strong>S</strong> 15'</td><td>Pemahaman awal jauh lebih baik dari SD1</td><td>Identifikasi kendala mandiri</td><td>Analisis cepat struktur masalah</td></tr>
+              <tr><td><strong>C</strong> 28'</td><td><strong>Pemodelan mandiri tanpa contoh</strong>; transfer ke masalah baru</td><td><strong>Memilih Desmos tanpa instruksi</strong>; multi-strategi verifikasi; <em>discovery feasibility</em></td><td>Setup slider Desmos mandiri; <em>binding constraints</em>; multi-kriteria <em>trade-off</em></td></tr>
+              <tr><td><strong>A-L-E</strong></td><td>Analogi "belajar naik sepeda"; transfer berhasil</td><td><em>Inquiry mindset</em>; pertanyaan lanjut sensitivitas</td><td><em>Trade-off</em> 3 produk; analisis keputusan kompleks</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>23<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">SD4 · Resolusi LO &amp; ADP Baru</div>
+          <h3 class="section">Status Resolusi Learning Obstacles</h3>
+          <table>
+            <thead><tr><th>LO</th><th>Awal → Akhir</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><strong>LO-06</strong></td><td>Ketergantungan <em>scaffolding</em> (Q) → mandiri dengan <em>checklist</em></td><td><strong style="color:var(--emerald-deep);">✓ Substansial</strong></td></tr>
+              <tr><td><strong>LO-12</strong></td><td>Butuh panduan integrasi (C) → <em>self-direction</em> penuh, inquiry mindset terinternalisasi</td><td><strong style="color:var(--emerald-deep);">✓✓ Kuat</strong></td></tr>
+              <tr><td><strong>LO-18</strong></td><td>Perlu perangkat interaktif (Cl) → transformasi teknis → konseptual</td><td><strong style="color:var(--emerald-deep);">✓✓✓ Sangat Kuat</strong></td></tr>
+            </tbody>
+          </table>
+          <h4 class="sub">ADP Baru (Revisi DDE)</h4>
+          <div class="callout maroon">
+            <span class="callout-title">Quitter</span>
+            <p style="margin: 0; font-size: 11px;">→ Berikan <strong>afirmasi: "Kamu sudah mandiri!"</strong> — rayakan transformasi dari ketergantungan ke kemandirian.</p>
+          </div>
+          <div class="callout">
+            <span class="callout-title">Camper</span>
+            <p style="margin: 0; font-size: 11px;">→ <strong>Jangan koreksi langsung!</strong> Biarkan siswa menemukan sendiri ketidaklayakan solusi (<em>productive struggle</em>) — ini momen transformatif.</p>
+          </div>
+          <div class="callout emerald">
+            <span class="callout-title">Climber</span>
+            <p style="margin: 0; font-size: 11px;">→ <em>"Batasan mana yang jika diubah akan mengubah solusi optimal?"</em> — pengayaan <em>binding constraints</em>.</p>
+          </div>
+          <div class="callout" style="margin-top: 12px;">
+            <span class="callout-title">Implikasi Pedagogis Utama</span>
+            <p style="margin: 0; font-size: 11px;"><strong>Diferensiasi yang konvergen</strong>: meskipun jalur berbeda — Quitter via <em>checklist</em>, Camper via <em>inquiry</em>, Climber via Desmos — semua profil AQ mencapai pemahaman optimasi yang solid.</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>24<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 15 : Formalisasi Alat Bantu + Protokol -->
+    <div class="leaf" data-leaf="15">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="eyebrow">DDE · Formalisasi</div>
+          <h3 class="section">Alat Bantu Visual</h3>
+          <p>Empat alat bantu visual yang lahir dari implementasi — sebagian dari temuan empiris guru, sebagian dari inisiatif siswa sendiri. Semua diformalkan dalam DDE.</p>
+          <table>
+            <thead><tr><th>Alat Bantu</th><th>SD</th><th>Sumber</th><th>Deskripsi</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Kode Warna Grafis</strong></td><td>SD2</td><td><em>Empiris</em></td><td>Hijau = Untung/Valid · Merah = Rugi/Tidak Valid</td></tr>
+              <tr><td><strong>Stabilo 3 Warna</strong></td><td>SD3</td><td><em>Inisiatif Siswa</em></td><td>Hijau = Terbatas · Biru = Tak Terbatas · Merah = Kosong</td></tr>
+              <tr><td><strong>"Tabel sebagai Jembatan"</strong></td><td>SD2</td><td><em>Konsep Siswa</em></td><td>Konteks → Tabel → Grafik → Interpretasi</td></tr>
+              <tr><td><strong>Desmos Slider Interaktif</strong></td><td>SD4</td><td><em>Empiris</em></td><td>Slider parameter untuk analisis sensitivitas dan <em>discovery learning</em></td></tr>
+            </tbody>
+          </table>
+          <div class="callout emerald">
+            <span class="callout-title">Catatan Penting</span>
+            <p style="margin: 0; font-size: 11px;">Dua dari empat alat bantu lahir dari <strong>siswa, bukan guru</strong>: stabilo dan "tabel sebagai jembatan". Hal ini menegaskan bahwa <em>desain didaktis</em> bukan transmisi satu arah, melainkan ko-konstruksi yang sensitif terhadap kreativitas siswa.</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>25<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">DDE · Kerangka Kognitif</div>
+          <h3 class="section">Protokol 4 Langkah Klasifikasi</h3>
+          <p>Diformalkan dari aplikasi efektif Camper di SD3. Memberikan kerangka sistematis untuk klasifikasi daerah penyelesaian sistem pertidaksamaan linear.</p>
+          <table>
+            <thead><tr><th>Langkah</th><th>Aktivitas</th><th>Contoh</th></tr></thead>
+            <tbody>
+              <tr><td><strong>1. Selesaikan</strong></td><td>Ubah setiap pertidaksamaan ke bentuk standar</td><td><em>2x + 3y ≤ 12 → y ≤ (12 − 2x)/3</em></td></tr>
+              <tr><td><strong>2. Identifikasi</strong></td><td>Tandai jenis batasan: maksimal (≤) atau minimal (≥)</td><td>Buat tabel: Batasan │ Jenis │ Nilai</td></tr>
+              <tr><td><strong>3. Periksa</strong></td><td>Cek kontradiksi: Σ(minimal) &gt; maksimal?</td><td>Jika YA → daerah <strong>KOSONG</strong></td></tr>
+              <tr><td><strong>4. Tentukan</strong></td><td>Klasifikasi berdasarkan kriteria identifikasi cepat</td><td>Maks + Min → Terbatas · Hanya satu → Tak Terbatas</td></tr>
+            </tbody>
+          </table>
+          <h4 class="sub">Penambahan Total ADP Baru</h4>
+          <div class="profile-grid">
+            <div class="profile-card" style="border-top: 4px solid var(--maroon);">
+              <div class="profile-name" style="color:var(--maroon);">QUITTER</div>
+              <div class="profile-tag">5 ADP baru</div>
+              <p style="font-size: 10.5px; margin: 6px 0 0 0;">Wait time, kertas berpetak, stabilo standar, afirmasi kemandirian, "hasil berbeda tidak salah".</p>
+            </div>
+            <div class="profile-card" style="border-top: 4px solid var(--gold-deep);">
+              <div class="profile-name" style="color:var(--gold-deep);">CAMPER</div>
+              <div class="profile-tag">5 ADP baru</div>
+              <p style="font-size: 10.5px; margin: 6px 0 0 0;">Pertanyaan pola, koneksi multi-representasi, ruang Gallery, <em>productive struggle</em>, justifikasi spontan.</p>
+            </div>
+            <div class="profile-card" style="border-top: 4px solid var(--emerald-deep);">
+              <div class="profile-name" style="color:var(--emerald-deep);">CLIMBER</div>
+              <div class="profile-tag">6 ADP baru</div>
+              <p style="font-size: 10.5px; margin: 6px 0 0 0;">Pembuktian dengan contoh, faktor pemilihan, batasan paling sensitif, <em>binding constraint</em>, multi-kriteria.</p>
+            </div>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>26<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 16 : Sintesis Akhir + Endpaper -->
+    <div class="leaf" data-leaf="16">
+      <div class="page front">
+        <div class="page-inner">
+          <div class="eyebrow">Penutup</div>
+          <h3 class="section">Sintesis Akhir</h3>
+          <p>Penelitian Desain Didaktis ini menghasilkan tiga kontribusi utama bagi praktik pembelajaran SPLTDV berbasis AQ:</p>
+          <ol style="font-size: 11.5px; line-height: 1.65;">
+            <li><strong>Validasi struktur HLT</strong> — Empat Situasi Didaktis progresif, metode SCALE lima fase, dan diferensiasi <em>scaffolding</em> tiga jenis terbukti efektif. Sebanyak 14 dari 18 <em>learning obstacles</em> berhasil diresolusi secara substansial.</li>
+            <li><strong>Penghalusan ADP via empirisme</strong> — Enam belas Antisipasi Didaktis Pedagogis baru lahir dari respons siswa yang tidak terduga. Ini menjadi nilai tambah kritis: <em>desain bukanlah dokumen mati, melainkan organisme yang tumbuh dari pengamatan teliti</em>.</li>
+            <li><strong>Ko-konstruksi alat bantu visual</strong> — Stabilo 3 warna dan "Tabel sebagai Jembatan" berasal dari inisiatif siswa, bukan instruksi guru. Hal ini mengukuhkan prinsip bahwa siswa adalah ko-arsitek pembelajarannya sendiri.</li>
+          </ol>
+          <div class="callout emerald" style="margin-top: 12px;">
+            <span class="callout-title">Implikasi untuk Penelitian Lanjut</span>
+            <p style="margin: 0; font-size: 11px;">Dari DDE yang dihasilkan, riset selanjutnya dapat menelusuri: (a) durabilitas pergeseran AQ &gt; 1 tahun, (b) generalisasi kerangka SCALE ke topik matematika lain, (c) integrasi <em>adaptive learning analytics</em> berbasis profil AQ.</p>
+          </div>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>27<span class="ornament"></span></div>
+      </div>
+      <div class="page back">
+        <div class="page-inner">
+          <div class="eyebrow">Refleksi</div>
+          <h3 class="section">Catatan Reflektif</h3>
+          <p>Selisih antara HLT dan ALT bukanlah kegagalan rancangan — ia adalah <em>jendela</em> yang memperlihatkan kompleksitas pembelajaran sesungguhnya. Setiap respons siswa yang tidak terantisipasi adalah bukti bahwa kelas adalah ekosistem hidup, bukan laboratorium tertutup.</p>
+          <p>Tugas peneliti dan guru adalah menjadi <em>pengamat yang teliti</em>: melihat ketika seorang Quitter menggambar stabilo warnanya sendiri, mendengar ketika seorang Camper bergumam "ternyata optimalnya tidak masuk akal", mencatat ketika seorang Climber berkata "kalau parameternya kuubah…". Momen-momen kecil itulah yang menjadi <strong>bahan baku</strong> bagi DDE.</p>
+          <div class="ornament-rule" style="margin: 22px 0;"><span class="line"></span><span class="glyph">❦</span><span class="line"></span></div>
+          <div class="closing-quote">
+            <em style="display:block; font-family: 'Cormorant Garamond', serif; font-size: 18px; line-height: 1.45; color: var(--emerald-deep); text-align: center;">"Sebuah desain yang baik bukanlah desain yang sempurna sejak awal — melainkan desain yang terus tumbuh bersama mereka yang menjalaninya."</em>
+          </div>
+          <div class="ornament-rule" style="margin: 22px 0;"><span class="line"></span><span class="glyph">❦</span><span class="line"></span></div>
+          <p style="text-align: center; font-style: italic; font-size: 11.5px; opacity: 0.75;">— Penyusun</p>
+        </div>
+        <div class="page-footer"><span class="ornament"></span>28<span class="ornament"></span></div>
+      </div>
+    </div>
+
+    <!-- LEAF 17 : Back endpaper + Back cover -->
+    <div class="leaf" data-leaf="17">
+      <div class="page front endpaper-back">
+        <div class="page-inner">
+          <div class="endpaper-content">
+            <div class="endpaper-glyph">❦</div>
+            <p class="endpaper-line">HLT memberikan <em>peta dugaan</em>.</p>
+            <p class="endpaper-line">ALT memberikan <em>peta perjalanan</em>.</p>
+            <div class="ornament-rule" style="margin: 24px auto; max-width: 220px;"><span class="line"></span><span class="glyph">✦</span><span class="line"></span></div>
+            <p class="endpaper-line">Bersama keduanya,</p>
+            <p class="endpaper-line">DDE menjadi peta yang lebih jujur</p>
+            <p class="endpaper-line">tentang bagaimana siswa belajar.</p>
+          </div>
+        </div>
+      </div>
+      <div class="page back back-cover">
+        <div class="back-cover-inner">
+          <div class="back-cover-top">
+            <div class="back-cover-eyebrow">Penelitian Desain Didaktis</div>
+            <div class="back-cover-glyph">❦</div>
+          </div>
+          <div class="back-cover-blurb">
+            <p>Dokumen perjalanan dari rancangan hipotetik (HLT) menuju lintasan aktual (ALT) — menghasilkan Desain Didaktis Empiris untuk pembelajaran SPLTDV berbasis <em>Adversity Quotient</em>.</p>
+            <p>Memuat empat Situasi Didaktis (Kantin · Fotokopi · Perencanaan · Toko Roti), tiga profil AQ (Quitter · Camper · Climber), metode SCALE lima fase, formalisasi Stabilo 3 Warna, dan Protokol 4 Langkah.</p>
+          </div>
+          <div class="back-cover-quote">
+            <em>"Selisih antara prediksi dan kenyataan justru menjadi sumber pembelajaran terkaya."</em>
+          </div>
+          <div class="back-cover-bottom">
+            <div class="back-cover-publisher">
+              <div class="pub-mark">❦</div>
+              <div class="pub-name">Makassar · 2025</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSERT_LEAVES_HERE -->
+
+  </div>
+</div>
+
+<!-- Navigation Controls -->
+<div class="nav-controls">
+  <button class="nav-btn" id="firstBtn" title="Halaman pertama">⇤</button>
+  <button class="nav-btn" id="prevBtn" title="Sebelumnya">‹</button>
+  <div class="page-counter"><span class="current" id="currentPage">1</span> / <span id="totalPages">2</span></div>
+  <button class="nav-btn" id="nextBtn" title="Selanjutnya">›</button>
+  <button class="nav-btn" id="lastBtn" title="Halaman terakhir">⇥</button>
+</div>
+
+<!-- TOC Overlay -->
+<div class="toc-overlay" id="tocOverlay">
+  <div class="toc-panel">
+    <button class="toc-close" id="tocCloseBtn">×</button>
+    <div class="toc-sub">Index · Daftar</div>
+    <h2>Daftar Isi</h2>
+    <div class="ornament-rule"><span class="line"></span><span class="glyph">❖</span><span class="line"></span></div>
+    <ul class="toc-list" id="tocList"></ul>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const leaves = Array.from(document.querySelectorAll('.leaf'));
+  const totalLeaves = leaves.length;
+  let currentLeaf = 0; // index of next leaf to be flipped (0..totalLeaves)
+
+  const currentPageEl = document.getElementById('currentPage');
+  const totalPagesEl = document.getElementById('totalPages');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const firstBtn = document.getElementById('firstBtn');
+  const lastBtn = document.getElementById('lastBtn');
+  const tocBtn = document.getElementById('tocBtn');
+  const tocOverlay = document.getElementById('tocOverlay');
+  const tocCloseBtn = document.getElementById('tocCloseBtn');
+  const tocList = document.getElementById('tocList');
+
+  // Set initial z-index: top leaves (low index) on top of stack
+  function resetZIndices() {
+    leaves.forEach((leaf, i) => {
+      if (leaf.classList.contains('flipped')) {
+        // Flipped leaves stack on the left; later flipped = higher z
+        leaf.style.zIndex = totalLeaves + i + 1;
+      } else {
+        // Unflipped: leaf 0 on top of right-side stack
+        leaf.style.zIndex = totalLeaves - i;
+      }
+    });
+  }
+
+  function updateUI() {
+    // Page count: each leaf = 2 pages
+    const totalPages = totalLeaves * 2;
+    // currentPage = pages that have been "turned past" + 1 (the current right-hand page)
+    // When currentLeaf=0, we're seeing page 1 (cover front)
+    // When currentLeaf=1, we've flipped 1 leaf, so we see pages 2-3 (leaf 0 back + leaf 1 front)
+    let displayPage;
+    if (currentLeaf === 0) {
+      displayPage = 1;
+    } else if (currentLeaf >= totalLeaves) {
+      displayPage = totalPages;
+    } else {
+      displayPage = currentLeaf * 2 + 1;
+    }
+    currentPageEl.textContent = displayPage;
+    totalPagesEl.textContent = totalPages;
+
+    prevBtn.disabled = currentLeaf === 0;
+    firstBtn.disabled = currentLeaf === 0;
+    nextBtn.disabled = currentLeaf >= totalLeaves;
+    lastBtn.disabled = currentLeaf >= totalLeaves;
+  }
+
+  function flipNext() {
+    if (currentLeaf >= totalLeaves) return;
+    const leaf = leaves[currentLeaf];
+    leaf.classList.add('flipped');
+    leaf.style.zIndex = totalLeaves + currentLeaf + 1;
+    currentLeaf++;
+    updateUI();
+  }
+
+  function flipPrev() {
+    if (currentLeaf <= 0) return;
+    currentLeaf--;
+    const leaf = leaves[currentLeaf];
+    leaf.classList.remove('flipped');
+    leaf.style.zIndex = totalLeaves - currentLeaf;
+    updateUI();
+  }
+
+  function goToLeaf(targetLeaf) {
+    targetLeaf = Math.max(0, Math.min(totalLeaves, targetLeaf));
+    if (targetLeaf > currentLeaf) {
+      // Flip forward
+      while (currentLeaf < targetLeaf) {
+        const leaf = leaves[currentLeaf];
+        leaf.classList.add('flipped');
+        leaf.style.zIndex = totalLeaves + currentLeaf + 1;
+        currentLeaf++;
+      }
+    } else if (targetLeaf < currentLeaf) {
+      while (currentLeaf > targetLeaf) {
+        currentLeaf--;
+        const leaf = leaves[currentLeaf];
+        leaf.classList.remove('flipped');
+        leaf.style.zIndex = totalLeaves - currentLeaf;
+      }
+    }
+    updateUI();
+  }
+
+  function goToFirst() { goToLeaf(0); }
+  function goToLast() { goToLeaf(totalLeaves); }
+
+  // Button bindings
+  prevBtn.addEventListener('click', flipPrev);
+  nextBtn.addEventListener('click', flipNext);
+  firstBtn.addEventListener('click', goToFirst);
+  lastBtn.addEventListener('click', goToLast);
+
+  // Click on book edges to flip
+  const book = document.querySelector('.book');
+  if (book) {
+    book.addEventListener('click', (e) => {
+      // Ignore if clicking on a link or interactive element
+      if (e.target.closest('a, button, input')) return;
+      const rect = book.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const isLeftHalf = clickX < rect.width / 2;
+      // Only treat clicks near edges (outer 25% on each side)
+      const edgeZone = rect.width * 0.25;
+      if (clickX < edgeZone) {
+        flipPrev();
+      } else if (clickX > rect.width - edgeZone) {
+        flipNext();
+      }
+    });
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (tocOverlay.classList.contains('open')) {
+      if (e.key === 'Escape') closeToc();
+      return;
+    }
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+      e.preventDefault();
+      flipNext();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      flipPrev();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      goToFirst();
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      goToLast();
+    }
+  });
+
+  // TOC overlay
+  function openToc() { tocOverlay.classList.add('open'); }
+  function closeToc() { tocOverlay.classList.remove('open'); }
+
+  if (tocBtn) tocBtn.addEventListener('click', openToc);
+  if (tocCloseBtn) tocCloseBtn.addEventListener('click', closeToc);
+  tocOverlay.addEventListener('click', (e) => {
+    if (e.target === tocOverlay) closeToc();
+  });
+
+  // Build TOC dynamically
+  const tocEntries = [
+    { type: 'front',   title: 'Sampul',                                 leaf: 0,  page: '—' },
+    { type: 'front',   title: 'Halaman Judul',                          leaf: 1,  page: 'i' },
+    { type: 'front',   title: 'Kata Pengantar',                         leaf: 1,  page: 'ii' },
+    { type: 'front',   title: 'Daftar Isi · Petunjuk',                  leaf: 2,  page: 'iii' },
+    { type: 'chapter', title: 'BAGIAN I — HLT (Hipotetik)',             leaf: 3,  page: '1' },
+    { type: 'sub',     title: 'Ikhtisar 4 Situasi Didaktis',            leaf: 3,  page: '2' },
+    { type: 'sub',     title: 'Diferensiasi Scaffolding 3 Profil AQ',   leaf: 4,  page: '3' },
+    { type: 'sub',     title: 'SD1 — Konsep Dasar (Kantin)',            leaf: 5,  page: '5' },
+    { type: 'sub',     title: 'SD2 — Representasi Grafis (Fotokopi)',   leaf: 6,  page: '7' },
+    { type: 'sub',     title: 'SD3 — Jenis Daerah (Perencanaan)',       leaf: 7,  page: '9' },
+    { type: 'sub',     title: 'SD4 — Optimasi (Toko Roti)',             leaf: 8,  page: '11' },
+    { type: 'chapter', title: 'BAGIAN II — ALT &amp; DDE (Empiris)',    leaf: 9,  page: '13' },
+    { type: 'sub',     title: 'Sintesis Perubahan DDH → DDE',           leaf: 9,  page: '14' },
+    { type: 'sub',     title: 'Komponen Terkonfirmasi Efektif',         leaf: 10, page: '15' },
+    { type: 'sub',     title: 'SD1 — Capaian Aktual',                   leaf: 11, page: '17' },
+    { type: 'sub',     title: 'SD2 — Capaian Aktual',                   leaf: 12, page: '19' },
+    { type: 'sub',     title: 'SD3 — Capaian Aktual',                   leaf: 13, page: '21' },
+    { type: 'sub',     title: 'SD4 — Capaian Aktual',                   leaf: 14, page: '23' },
+    { type: 'sub',     title: 'Formalisasi Alat Bantu &amp; Protokol',  leaf: 15, page: '25' },
+    { type: 'sub',     title: 'Sintesis Akhir &amp; Refleksi',          leaf: 16, page: '27' },
+    { type: 'back',    title: 'Sampul Belakang',                        leaf: 17, page: '—' }
+  ];
+
+  tocEntries.forEach(entry => {
+    const li = document.createElement('li');
+    li.className = entry.type;
+    li.innerHTML = `
+      <span class="toc-title">${entry.title}</span>
+      <span class="toc-dots"></span>
+      <span class="toc-num">${entry.page}</span>
+    `;
+    li.addEventListener('click', () => {
+      goToLeaf(entry.leaf);
+      closeToc();
+    });
+    tocList.appendChild(li);
+  });
+
+  // Initial setup
+  resetZIndices();
+  updateUI();
+
+  // Touch swipe support for mobile
+  let touchStartX = null;
+  let touchStartY = null;
+  document.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (touchStartX === null) return;
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - touchStartX;
+    const dy = touch.clientY - touchStartY;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) flipNext();
+      else flipPrev();
+    }
+    touchStartX = null;
+    touchStartY = null;
+  }, { passive: true });
+
+})();
+</script>
+</body>
+</html>
